@@ -12,9 +12,6 @@ Set-StrictMode -Version Latest
 #     THESE TEST ARE DESTRUCTIVE. USE A CLEAN BURPSUITE.     #
 ##############################################################
 
-Import-Module "D:\git\BurpSuite\.out\BurpSuite\1.0.0\BurpSuite.psd1" -Force
-Import-Module "D:\git\BurpSuiteDeploy\.out\BurpSuiteDeploy\0.1.0\BurpSuiteDeploy.psd1" -Force
-
 Describe 'Invoke-BurpSuiteDeploy' -Tag 'CD' {
     BeforeAll {
         $BURPSUITE_APIKEY = $env:BURPSUITE_APIKEY
