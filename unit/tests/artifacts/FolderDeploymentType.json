@@ -1,0 +1,8 @@
+{
+    "ResourceId": "BurpSuite/Folders/Example.com",
+    "ResourceType": "BurpSuite/Folders",
+    "Name": "Example.com",
+    "Properties": {
+        "parentId": "0"
+    }
+}

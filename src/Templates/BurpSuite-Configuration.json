@@ -1,0 +1,91 @@
+{
+    "$schema": "",
+    "contentVersion": "1.0.0.0",
+    "parameters": {},
+    "variables": {},
+    "resources": [
+        {
+            "apiVersion": "",
+            "type": "BurpSuite/Folders",
+            "name": "Example.com",
+            "dependsOn": [],
+            "properties": {
+                "parentId": "0"
+            },
+            "resources": [
+                {
+                    "apiVersion": "",
+                    "type": "Sites",
+                    "name": "www.example.com",
+                    "dependsOn": [],
+                    "properties": {
+                        "scope": {
+                            "includedUrls": [
+                                "https://www.example.com"
+                            ],
+                            "excludedUrls": []
+                        },
+                        "applicationLogins": [
+                            {
+                                "label": "admin",
+                                "username": "administrator",
+                                "password": "chamgeme"
+                            }
+                        ],
+                        "email_recipients": [
+                            {
+                                "email": "foo@example.com"
+                            }
+                        ]
+                    },
+                    "resources": [
+                        {}
+                    ]
+                }
+            ]
+        },
+        {
+            "apiVersion": "",
+            "type": "BurpSuite/Sites",
+            "name": "root.example.com",
+            "dependsOn": [
+                "BurpSuite/ScanConfigurations/Example - Large Scan Configuration"
+            ],
+            "properties": {
+                "parentId": "0",
+                "scope": {
+                    "includedUrls": [
+                        "https://root.example.com"
+                    ],
+                    "excludedUrls": []
+                },
+                "applicationLogins": [
+                    {
+                        "label": "admin",
+                        "username": "administrator",
+                        "password": "chamgeme"
+                    }
+                ],
+                "email_recipients": [
+                    {
+                        "email": "foo@example.com"
+                    }
+                ]
+            },
+            "resources": [
+                {}
+            ]
+        },
+        {
+            "apiVersion": "",
+            "type": "BurpSuite/ScanConfigurations",
+            "name": "Example - Large Scan Configuration",
+            "dependsOn": [],
+            "properties": {
+                "scanConfigurationFragmentJson": "{\r\n    \"scanner\":{\r\n        \"issues_reported\":{\r\n            \"scan_type_intrusive_active\":true,\r\n            \"scan_type_javascript_analysis\":false,\r\n            \"scan_type_light_active\":true,\r\n            \"scan_type_medium_active\":true,\r\n            \"scan_type_passive\":true,\r\n            \"select_individual_issues\":false,\r\n            \"selected_issues\":[]\r\n        }\r\n    }\r\n}\r\n"
+            },
+            "resources": []
+        }
+    ],
+    "outputs": {}
+}

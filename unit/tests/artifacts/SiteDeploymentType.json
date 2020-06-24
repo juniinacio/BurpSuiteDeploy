@@ -1,0 +1,24 @@
+{
+    "ResourceId": "BurpSuite/Sites/www.example.com",
+    "ResourceType": "BurpSuite/Sites",
+    "Name": "www.example.com",
+    "Properties": {
+        "parentId": "0",
+        "scope": {
+            "includedUrls": [
+                "https://www.example.com"
+            ],
+            "excludedUrls": [
+                "https://www.example.com/wp-admin/"
+            ]
+        },
+        "emailRecipients": [
+            {
+                "email": "support@example.com"
+            }
+        ],
+        "scanConfigurationIds": [
+            "986e6ff9-1f02-4953-8950-77cf4e473d0a"
+        ]
+    }
+}
