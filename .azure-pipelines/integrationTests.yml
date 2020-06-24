@@ -64,6 +64,29 @@ jobs:
                 ARTIFACTS_PAT: $(ARTIFACTS_PAT)
 
             - task: PowerShell@2
+              displayName: 'Install BurpSuite Module'
+              inputs:
+                targetType: 'inline'
+                script: |
+                  # Load the psd1 file so you can read the version
+                  $manifest = Import-PowerShellDataFile $Env:OUTPUTMODVERDIR/$(ModuleName).psd1
+
+                  $n = "BurpSuite"
+                  $e = "$(ARTIFACTS_EMAIL)"
+                  $pwd = ConvertTo-SecureString $Env:ARTIFACTS_PAT -AsPlainText -Force # Readonly PAT for Azure DevOps artifacts
+                  $creds = New-Object PSCredential($e, $pwd)
+
+                  # LINK: https://github.com/Microsoft/artifacts-credprovider
+                  $Env:NUGET_CREDENTIALPROVIDER_SESSIONTOKENCACHE_ENABLED = 'true'
+                  $Env:VSS_NUGET_EXTERNAL_FEED_ENDPOINTS = '{{"endpointCredentials": [{{"endpoint":"{0}", "username":"{1}", "password":"{2}"}}]}}' -f $url, $e, $pwd
+
+                  Install-Module -Name "$(TEST_MODULENAME)" -Repository $n -Credential $creds -Force -Scope CurrentUser -Verbose
+                workingDirectory: '$(Pipeline.Workspace)/module'
+                pwsh: ${{ parameters.pwsh }}
+              env:
+                ARTIFACTS_PAT: $(ARTIFACTS_PAT)
+
+            - task: PowerShell@2
               displayName: 'Install $(TEST_MODULENAME) Module'
               inputs:
                 targetType: 'inline'
