@@ -48,7 +48,7 @@ jobs:
               inputs:
                 targetType: 'inline'
                 script: |
-                  $n = "$(TEST_MODULENAME)"
+                  $n = "BurpSuite"
                   $e = "$(ARTIFACTS_EMAIL)"
                   $url = "$(ARTIFACTS_URL)"
                   $pwd = ConvertTo-SecureString $Env:ARTIFACTS_PAT -AsPlainText -Force
@@ -94,7 +94,7 @@ jobs:
                   # Load the psd1 file so you can read the version
                   $manifest = Import-PowerShellDataFile $Env:OUTPUTMODVERDIR/$(ModuleName).psd1
 
-                  $n = "$(TEST_MODULENAME)"
+                  $n = "BurpSuite"
                   $e = "$(ARTIFACTS_EMAIL)"
                   $b = "$($manifest.ModuleVersion).$(Build.BuildId)"
                   $pwd = ConvertTo-SecureString $Env:ARTIFACTS_PAT -AsPlainText -Force # Readonly PAT for Azure DevOps artifacts
