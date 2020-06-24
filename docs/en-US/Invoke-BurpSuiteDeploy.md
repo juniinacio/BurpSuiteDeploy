@@ -8,7 +8,7 @@ schema: 2.0.0
 # Invoke-BurpSuiteDeploy
 
 ## SYNOPSIS
-{{ Fill in the Synopsis }}
+Applies your configuration on BurpSuite.
 
 ## SYNTAX
 
@@ -18,21 +18,21 @@ Invoke-BurpSuiteDeploy [-TemplateFile] <String[]> [-Uri] <String> [-APIKey] <Str
 ```
 
 ## DESCRIPTION
-{{ Fill in the Description }}
+Applies your configuration on BurpSuite.
 
 ## EXAMPLES
 
 ### Example 1
 ```powershell
-PS C:\> {{ Add example code here }}
+PS C:\> Invoke-BurpSuiteDeploy -TemplateFile -TemplateFile C:\templates\BurpSuite.json -Uri https://burpsuite.example.com  -APIkey 'MyKey'
 ```
 
-{{ Add example description here }}
+This example shows how to apply a configuration.
 
 ## PARAMETERS
 
 ### -APIKey
-{{ Fill APIKey Description }}
+Specify the API key for connecting to your BurpSuite instance.
 
 ```yaml
 Type: String
@@ -62,7 +62,7 @@ Accept wildcard characters: False
 ```
 
 ### -TemplateFile
-{{ Fill TemplateFile Description }}
+Specify the path to your BurpSuite configuration template.
 
 ```yaml
 Type: String[]
@@ -77,7 +77,7 @@ Accept wildcard characters: False
 ```
 
 ### -Uri
-{{ Fill Uri Description }}
+Specify the URI for connecting to your BurpSuite instance.
 
 ```yaml
 Type: String
