@@ -30,6 +30,11 @@ stages:
 - stage: Build_Stage
   displayName: BurpSuiteDeploy
 
+  variables:
+    ARTIFACTS_URL: $(ArtifactsUrl)
+    ARTIFACTS_EMAIL: $(ArtifactsEmail)
+    ARTIFACTS_PAT: $(ArtifactsPAT)
+
   jobs:
   - job: macOS_Linux_Phase
     displayName: Build Linux (Pwsh)
