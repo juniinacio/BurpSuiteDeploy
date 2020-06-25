@@ -168,6 +168,10 @@ stages:
     pool:
       vmImage: 'ubuntu-latest'
     environment: 'Artifacts'
+    variables:
+      ARTIFACTS_URL: $(ArtifactsUrl)
+      ARTIFACTS_EMAIL: $(ArtifactsEmail)
+      ARTIFACTS_PAT: $(ArtifactsPAT)
     strategy:
       runOnce:
         deploy:
