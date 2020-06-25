@@ -19,6 +19,8 @@ steps:
         $Env:VSS_NUGET_EXTERNAL_FEED_ENDPOINTS = '{{"endpointCredentials": [{{"endpoint":"{0}", "username":"{1}", "password":"{2}"}}]}}' -f $url, $e, $pwd
 
         if(-not (Get-PSRepository | ? Name -eq $n)) { Register-PSRepository -Credential $creds -Name $n -SourceLocation $url -PublishLocation $url -InstallationPolicy Trusted -Verbose }
+
+        Install-Module -Name "BurpSuite" -Repository $n -Credential $creds -Force -Scope CurrentUser -Verbose
     pwsh: ${{ parameters.pwsh }}
   env:
     ARTIFACTS_PAT: $(ARTIFACTS_PAT)
