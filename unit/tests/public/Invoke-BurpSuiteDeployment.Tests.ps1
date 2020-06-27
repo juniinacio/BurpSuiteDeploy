@@ -161,7 +161,7 @@ InModuleScope $env:BHProjectName {
                         -and $EmailRecipients[0].email -eq $testDeployments[1].Properties.EmailRecipients[0].email `
                         -and $ApplicationLogins[0].label -eq $testDeployments[1].Properties.ApplicationLogins[0].label `
                         -and $ApplicationLogins[0].username -eq $testDeployments[1].Properties.ApplicationLogins[0].username `
-                        -and $ApplicationLogins[0].password -eq $testDeployments[1].Properties.ApplicationLogins[0].password
+                        # -and $ApplicationLogins[0].password -eq $testDeployments[1].Properties.ApplicationLogins[0].password
                 }
 
                 $deployments[0].Id | Should -Be $testFolderDeploymentResult.Id
