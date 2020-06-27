@@ -62,7 +62,7 @@ InModuleScope $env:BHProjectName {
                 $testArtifacts = Join-Path -Path $PSScriptRoot -ChildPath '..\artifacts'
             }
 
-            It "should call New-BurpSuite" {
+            It "should call New-BurpSuiteSite" {
                 # arrange
                 $testDeployment = ConvertFrom-Json -InputObject (Get-Content -Path $testArtifacts\SiteDeploymentType.json | Out-String)
                 $testDeploymentResult = [PSCustomObject]@{
@@ -84,10 +84,13 @@ InModuleScope $env:BHProjectName {
                 Should -Invoke -CommandName New-BurpSuiteSite -ParameterFilter {
                     $ParentId -eq 0 `
                         -and $Name -eq $testDeployment.Name `
-                        -and ($IncludedUrls -join ',') -eq ($testDeployment.Properties.Scope.IncludedUrls -join ',') `
-                        -and ($ExcludedUrls -join ',') -eq ($testDeployment.Properties.Scope.ExcludedUrls -join ',') `
-                        -and ($ScanConfigurationIds -join ',') -eq ($testDeployment.Properties.ScanConfigurationIds -join ',') `
-                        # -and ($EmailRecipients -join ',') -eq ($testDeployment.Properties.EmailRecipients.email -join ',')
+                        -and $Scope.IncludedUrls[0] -eq $testDeployment.Properties.Scope.IncludedUrls[0] `
+                        -and $Scope.ExcludedUrls[0] -eq $testDeployment.Properties.Scope.ExcludedUrls[0] `
+                        -and $ScanConfigurationIds[0] -eq $testDeployment.Properties.ScanConfigurationIds[0] `
+                        -and $EmailRecipients[0].email -eq $testDeployment.Properties.EmailRecipients[0].email `
+                        -and $ApplicationLogins[0].label -eq $testDeployment.Properties.ApplicationLogins[0].label `
+                        -and $ApplicationLogins[0].username -eq $testDeployment.Properties.ApplicationLogins[0].username `
+                        -and $ApplicationLogins[0].password -eq $testDeployment.Properties.ApplicationLogins[0].password
                 }
 
                 $deployment.Id | Should -Be $testDeploymentResult.Id
@@ -112,7 +115,7 @@ InModuleScope $env:BHProjectName {
                 $testArtifacts = Join-Path -Path $PSScriptRoot -ChildPath '..\artifacts'
             }
 
-            It "should call New-BurpSuite" {
+            It "should call New-BurpSuiteSite" {
                 # arrange
                 $testDeployments = ConvertFrom-Json -InputObject (Get-Content -Path $testArtifacts\FolderSiteDeploymentType.json | Out-String)
                 $testFolderDeploymentResult = [PSCustomObject]@{
@@ -152,10 +155,13 @@ InModuleScope $env:BHProjectName {
                 Should -Invoke -CommandName New-BurpSuiteSite -ParameterFilter {
                     $ParentId -eq $testFolderDeploymentResult.Id `
                         -and $Name -eq $testDeployments[1].Name `
-                        -and $IncludedUrls[0] -eq $testDeployments[1].Properties.scope.includedUrls[0] `
-                        -and $ExcludedUrls[0] -eq $testDeployments[1].Properties.scope.excludedUrls[0] `
+                        -and $Scope.IncludedUrls[0] -eq $testDeployments[1].Properties.scope.includedUrls[0] `
+                        -and $Scope.ExcludedUrls[0] -eq $testDeployments[1].Properties.scope.excludedUrls[0] `
                         -and $ScanConfigurationIds[0] -eq $testDeployments[1].Properties.scanConfigurationIds[0] `
-                        # -and ($EmailRecipients -join ',') -eq ($testDeployments.Properties.EmailRecipients.email -join ',')
+                        -and $EmailRecipients[0].email -eq $testDeployments[1].Properties.EmailRecipients[0].email `
+                        -and $ApplicationLogins[0].label -eq $testDeployments[1].Properties.ApplicationLogins[0].label `
+                        -and $ApplicationLogins[0].username -eq $testDeployments[1].Properties.ApplicationLogins[0].username `
+                        -and $ApplicationLogins[0].password -eq $testDeployments[1].Properties.ApplicationLogins[0].password
                 }
 
                 $deployments[0].Id | Should -Be $testFolderDeploymentResult.Id

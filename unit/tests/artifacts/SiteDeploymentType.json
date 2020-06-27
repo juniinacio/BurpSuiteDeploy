@@ -17,6 +17,13 @@
                 "email": "support@example.com"
             }
         ],
+        "applicationLogins": [
+            {
+                "label": "admin",
+                "username": "administrator",
+                "password": "chamgeme"
+            }
+        ],
         "scanConfigurationIds": [
             "986e6ff9-1f02-4953-8950-77cf4e473d0a"
         ]
