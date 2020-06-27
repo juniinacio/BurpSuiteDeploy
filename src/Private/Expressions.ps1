@@ -4,7 +4,7 @@ function _testIsExpression {
         [object] $InputString
     )
 
-    $InputString -match "^\[[a-zA-z]+\(.+\)\]$"
+    $InputString -match '^\[.+\]$'
 }
 
 function _resolveExpression {
@@ -14,23 +14,32 @@ function _resolveExpression {
         [object[]] $resources
     )
 
-    $safeCommands = @('variables', 'concat', 'resourceId')
+    if (-not (_testIsExpression -InputString $inputString)) {
+        return $inputString
+    }
 
-    $expression = [scriptblock]::Create("return ($inputString)")
+    $safeCommands = @('variables', 'concat', 'resourceId', 'reference')
+
+    $parsedString = (($inputString -replace '^\[', '') -replace '\]$', '')
+
+    $expression = [scriptblock]::Create("return ($parsedString)")
 
     function variables([string]$name) { ($variables[$name]) }
     function concat([string[]]$arguments) { ($arguments -join '') }
-    function resourceId([string[]]$resource) {
-        $resourceId = ($resource |
+    function resourceId([string[]]$segments) {
+        $resourceId = (
+            $segments |
             ForEach-Object {
-                if ($null -ne $_) {
+                if (-not ([string]::IsNullOrEmpty($_))) {
                     $_.TrimEnd("/")
                 }
-            }) -join '/'
-        $resources | Where-Object { $_.Id -eq $resourceId }
+            }
+        ) -join '/'
+        $resourceId
     }
+    function reference([string]$resourceId) { $resources | Where-Object { $_.Id -eq $resourceId } }
 
-    $ast = [System.Management.Automation.Language.Parser]::ParseInput($inputString, [ref]$null, [ref]$null)
+    $ast = [System.Management.Automation.Language.Parser]::ParseInput($parsedString, [ref]$null, [ref]$null)
 
     $commandsAst = $ast.FindAll( {
             ($args[0] -is [System.Management.Automation.Language.CommandAst]) `

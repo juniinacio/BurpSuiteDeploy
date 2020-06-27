@@ -30,7 +30,7 @@ InModuleScope $env:BHProjectName {
             It "should resolve variables expressions" {
                 # arrange
                 $variables = @{foo = 'bar' }
-                $testString = "variables('foo')"
+                $testString = "[variables('foo')]"
 
                 # act
                 $assert = _resolveExpression -InputString $testString -variables $variables
@@ -46,7 +46,23 @@ InModuleScope $env:BHProjectName {
                     Id   = 'BurpSuite/Sites/www.example.com'
                     Name = 'www.example.com'
                 }
-                $testString = "(resourceId('BurpSuite/Sites', 'www.example.com')).Name"
+                $testString = "[resourceId('BurpSuite/Sites', 'www.example.com')]"
+
+                # act
+                $assert = _resolveExpression -InputString $testString -resources $resources
+
+                # assert
+                $assert | Should -Be 'BurpSuite/Sites/www.example.com'
+            }
+
+            It "should resolve reference expressions" {
+                # arrange
+                $resources = @()
+                $resources += [PSCustomObject]@{
+                    Id   = 'BurpSuite/Sites/www.example.com'
+                    Name = 'www.example.com'
+                }
+                $testString = "[(reference('BurpSuite/Sites/www.example.com')).Name]"
 
                 # act
                 $assert = _resolveExpression -InputString $testString -resources $resources
@@ -57,7 +73,7 @@ InModuleScope $env:BHProjectName {
 
             It "should resolve concat expressions" {
                 # arrange
-                $testString = "concat('BurpSuite/Sites', '/', 'www.example.com')"
+                $testString = "[concat('BurpSuite/Sites', '/', 'www.example.com')]"
 
                 # act
                 $assert = _resolveExpression -InputString $testString -resources $resources
@@ -73,7 +89,24 @@ InModuleScope $env:BHProjectName {
                     Id   = 'BurpSuite/Sites/www.example.com'
                     Name = 'www.example.com'
                 }
-                $testString = "(resourceId('BurpSuite/Sites', (concat('www', '.', 'example', '.', 'com')))).Name"
+                $testString = "[resourceId('BurpSuite/Sites', (concat('www', '.', 'example', '.', 'com')))]"
+
+                # act
+                $assert = _resolveExpression -InputString $testString -resources $resources
+
+                # assert
+                $assert | Should -Be 'BurpSuite/Sites/www.example.com'
+            }
+
+            It "should resolve complex reference expressions" {
+                # arrange
+                $resources = @()
+                $resources += [PSCustomObject]@{
+                    Id   = 'BurpSuite/Sites/www.example.com'
+                    Name = 'www.example.com'
+                }
+                $testString = "[(reference((resourceId('BurpSuite/Sites', (concat('www', '.', 'example', '.', 'com')))))).Name]"
+                # (resourceId('BurpSuite/Sites', (concat('www', '.', 'example', '.', 'com'))))
 
                 # act
                 $assert = _resolveExpression -InputString $testString -resources $resources
@@ -84,7 +117,7 @@ InModuleScope $env:BHProjectName {
 
             It "should not resolve certain expressions" {
                 # arrange
-                $testString = "concat((Get-ChildItem))"
+                $testString = "[concat((Get-ChildItem))]"
 
                 Mock -CommandName Invoke-Expression
 
