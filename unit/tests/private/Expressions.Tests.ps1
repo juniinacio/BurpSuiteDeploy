@@ -106,7 +106,6 @@ InModuleScope $env:BHProjectName {
                     Name = 'www.example.com'
                 }
                 $testString = "[(reference((resourceId('BurpSuite/Sites', (concat('www', '.', 'example', '.', 'com')))))).Name]"
-                # (resourceId('BurpSuite/Sites', (concat('www', '.', 'example', '.', 'com'))))
 
                 # act
                 $assert = _resolveExpression -InputString $testString -resources $resources
