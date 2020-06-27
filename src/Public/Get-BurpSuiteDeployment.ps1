@@ -22,6 +22,19 @@ function Get-BurpSuiteDeployment {
                         ResourceType = $resource.type.TrimEnd("/")
                         Name = $resource.name
                         Properties = $resource.Properties
+                        DependsOn = $resource.dependsOn
+                    }
+
+                    if ($null -ne (_tryGetProperty -InputObject $resource -PropertyName 'resources')) {
+                        foreach($childResource in $resource.resources) {
+                            [PSCustomObject]@{
+                                ResourceId = @($resource.type.TrimEnd("/"), (($childResource.name.TrimStart("/")) -split "/")[0], $childResource.type.TrimEnd("/"), (($childResource.name.TrimStart("/")) -split "/")[-1]) -join "/"
+                                ResourceType = @($resource.type.TrimEnd("/"), $childResource.type.TrimStart("/")) -join "/"
+                                Name = (($childResource.name.TrimStart("/")) -split "/")[-1]
+                                Properties = $childResource.Properties
+                                DependsOn = $childResource.dependsOn
+                            }
+                        }
                     }
                 }
             }
@@ -30,7 +43,7 @@ function Get-BurpSuiteDeployment {
                 throw "No resources processed. Something went wrong."
             }
 
-            $resources
+            _sortDeployment -Resources $resources
         } catch {
             throw
         }

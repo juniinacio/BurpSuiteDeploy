@@ -28,17 +28,13 @@ function Invoke-BurpSuiteDeploy {
 
                 $deployments = Get-BurpSuiteDeployment -TemplateFile $TemplateFile
 
-                $deploymentsResults = @()
+                $results = $deployments | Invoke-BurpSuiteDeployment -Confirm:$false
 
-                foreach ($deployment in $deployments) {
-                    $deploymentsResults += $deployment | Invoke-BurpSuiteDeployment -Confirm:$false
-                }
-
-                if (@($deploymentsResults).ProvisioningState -contains [ProvisioningState]::Error) {
+                if (@($results).ProvisioningState -contains [ProvisioningState]::Error) {
                     Write-Error -Message "Provisioning of one or more resources completed with errors."
                 }
 
-                $deploymentsResults
+                $results
             }
         } catch {
             throw
@@ -49,7 +45,7 @@ function Invoke-BurpSuiteDeploy {
         try {
             Disconnect-BurpSuite
         } catch {
-            # throw
+            throw
         }
     }
 }

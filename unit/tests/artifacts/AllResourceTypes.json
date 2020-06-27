@@ -12,42 +12,7 @@
             "properties": {
                 "parentId": "0"
             },
-            "resources": [
-                {
-                    "apiVersion": "",
-                    "type": "Sites",
-                    "name": "Example.com",
-                    "dependsOn": [],
-                    "properties": {
-                        "scope": {
-                            "includedUrls": [
-                                "https://www.example.com"
-                            ],
-                            "excludedUrls": [
-                                "https://www.example.com/login"
-                            ]
-                        },
-                        "applicationLogins": [
-                            {
-                                "label": "admin",
-                                "username": "administrator",
-                                "password": "chamgeme"
-                            }
-                        ],
-                        "emailRecipients": [
-                            {
-                                "email": "foo@example.com"
-                            }
-                        ],
-                        "scanConfigurationIds": [
-                            "9c0aba7a-6ce8-4ab9-9b66-ae6d27b0a3dd"
-                        ]
-                    },
-                    "resources": [
-                        {}
-                    ]
-                }
-            ]
+            "resources": []
         },
         {
             "apiVersion": "",
@@ -90,9 +55,7 @@
                     "9c0aba7a-6ce8-4ab9-9b66-ae6d27b0a3dd"
                 ]
             },
-            "resources": [
-                {}
-            ]
+            "resources": []
         }
     ],
     "outputs": {}

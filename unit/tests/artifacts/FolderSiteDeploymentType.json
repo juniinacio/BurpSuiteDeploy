@@ -1,0 +1,44 @@
+[
+    {
+        "ResourceId": "BurpSuite/Folders/Example.com",
+        "ResourceType": "BurpSuite/Folders",
+        "Name": "Example.com",
+        "Properties": {
+            "parentId": "0"
+        },
+        "DependsOn": []
+    },
+    {
+        "ResourceId": "BurpSuite/Folders/Example.com/Sites/www.example.com",
+        "ResourceType": "BurpSuite/Folders/Sites",
+        "Name": "www.example.com",
+        "Properties": {
+            "scope": {
+                "includedUrls": [
+                    "https://www.example.com"
+                ],
+                "excludedUrls": [
+                    "https://www.example.com/wp-admin/"
+                ]
+            },
+            "applicationLogins": [
+                {
+                    "label": "admin",
+                    "username": "administrator",
+                    "password": "chamgeme"
+                }
+            ],
+            "emailRecipients": [
+                {
+                    "email": "foo@example.com"
+                }
+            ],
+            "scanConfigurationIds": [
+                "9c0aba7a-6ce8-4ab9-9b66-ae6d27b0a3dd"
+            ]
+        },
+        "DependsOn": [
+            "BurpSuite/Folders/Example.com"
+        ]
+    }
+]

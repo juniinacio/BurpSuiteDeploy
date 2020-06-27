@@ -13,7 +13,7 @@ Invokes one or more deployments.
 ## SYNTAX
 
 ```
-Invoke-BurpSuiteDeployment [-Deployment] <PSObject> [-WhatIf] [-Confirm] [<CommonParameters>]
+Invoke-BurpSuiteDeployment [-Deployments] <PSObject[]> [-WhatIf] [-Confirm] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -45,11 +45,11 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -Deployment
-Specify a deployment object, pipe the output from `Get-BurpSuiteDeployment` to this parameter.
+### -Deployments
+{{ Fill Deployments Description }}
 
 ```yaml
-Type: PSObject
+Type: PSObject[]
 Parameter Sets: (All)
 Aliases:
 
