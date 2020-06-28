@@ -20,7 +20,7 @@
             "name": "Example - Large Scan Configuration",
             "dependsOn": [],
             "properties": {
-                "scanConfigurationFragmentJson": "{\r\n    \"scanner\":{\r\n        \"issues_reported\":{\r\n            \"scan_type_intrusive_active\":true,\r\n            \"scan_type_javascript_analysis\":false,\r\n            \"scan_type_light_active\":true,\r\n            \"scan_type_medium_active\":true,\r\n            \"scan_type_passive\":true,\r\n            \"select_individual_issues\":false,\r\n            \"selected_issues\":[]\r\n        }\r\n    }\r\n}\r\n"
+                "scanConfigurationFragmentJson": "{\n    \"crawler\":{\n        \"crawl_limits\":{\n            \"maximum_crawl_time\":10,\n            \"maximum_request_count\":0,\n            \"maximum_unique_locations\":5000\n        }\n    }\n}"
             },
             "resources": []
         },
@@ -28,7 +28,9 @@
             "apiVersion": "",
             "type": "BurpSuite/Sites",
             "name": "www.example.com",
-            "dependsOn": [],
+            "dependsOn": [
+                "BurpSuite/ScanConfigurations/Example - Large Scan Configuration"
+            ],
             "properties": {
                 "parentId": "0",
                 "scope": {
@@ -42,8 +44,8 @@
                 "applicationLogins": [
                     {
                         "label": "admin",
-                        "username": "administrator",
-                        "password": "chamgeme"
+                        "username": "admin",
+                        "password": "ChangeMe"
                     }
                 ],
                 "emailRecipients": [

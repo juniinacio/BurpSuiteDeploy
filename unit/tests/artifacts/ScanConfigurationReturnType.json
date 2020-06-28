@@ -1,0 +1,5 @@
+{
+    "id": "a469d9d4-20ee-4d99-b727-c8072066f761",
+    "name": "Example - Large Scan Configuration",
+    "scan_configuration_fragment_json": "{\n    \"crawler\":{\n        \"crawl_limits\":{\n            \"maximum_crawl_time\":10,\n            \"maximum_request_count\":0,\n            \"maximum_unique_locations\":5000\n        }\n    }\n}"
+}

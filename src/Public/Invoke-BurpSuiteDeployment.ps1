@@ -4,100 +4,134 @@ function Invoke-BurpSuiteDeployment {
         ConfirmImpact = 'Medium')]
     Param (
         [parameter(ValueFromPipeline = $True, Mandatory = $True)]
-        [psobject[]]$Deployments
+        [psobject]$Deployment
     )
 
     begin {
-        $siteTree = Get-BurpSuiteSiteTree
-        $scanConfigurations = Get-BurpSuiteScanConfiguration
+        [SiteTreeCache]::SiteTree = Get-BurpSuiteSiteTree
+        [ScanConfigurationCache]::ScanConfigurations = @(Get-BurpSuiteScanConfiguration)
     }
 
     process {
         try {
-            foreach ($deployment in $Deployments) {
-                if ($PSCmdlet.ShouldProcess("Deploy", $deployment.ResourceId)) {
-                    switch ($deployment.ResourceType) {
-                        'BurpSuite/Sites' {
-                            $resource = $siteTree.sites | Where-Object { $_.parent_id -eq 0 -and $_.name -eq $deployment.Name }
+            if ($PSCmdlet.ShouldProcess("Deploy", $deployment.ResourceId)) {
+                switch ($deployment.ResourceType) {
+                    'BurpSuite/Sites' {
+                        $resource = [SiteTreeCache]::Get(0, $deployment.Name, 'Sites')
+                        if ($null -eq $resource) {
+                            $parameters = @{
+                                ParentId             = "0"
+                                Name                 = $deployment.Name
+                                Scope                = $deployment.Properties.scope
+                                ScanConfigurationIds = $deployment.Properties.scanConfigurationIds
+                            }
+
+                            if ($null -ne ($deployment.Properties.emailRecipients)) {
+                                $parameters.EmailRecipients = $deployment.Properties.emailRecipients
+                            }
+
+                            if ($null -ne ($deployment.Properties.applicationLogins)) {
+                                $applicationLogins = @()
+
+                                foreach ($applicationLogin in $deployment.Properties.applicationLogins) {
+                                    $applicationLogins += [PSCustomObject]@{ Label = $applicationLogin.Label; Username = $applicationLogin.Username; Password = $applicationLogin.Password }
+                                }
+
+                                $parameters.ApplicationLogins = $applicationLogins
+                            }
+
+                            $resource = New-BurpSuiteSite @parameters
+
+                            [SiteTreeCache]::SiteTree = Get-BurpSuiteSiteTree
+                        }
+                    }
+
+                    'BurpSuite/Folders' {
+                        $resource = [SiteTreeCache]::Get(0, $deployment.Name, 'Folders')
+                        if ($null -eq $resource) {
+                            $resource = New-BurpSuiteFolder -ParentId 0 -Name $deployment.Name
+
+                            [SiteTreeCache]::SiteTree = Get-BurpSuiteSiteTree
+                        }
+                    }
+
+                    'BurpSuite/Folders/Sites' {
+                        $parentResourceId = ($deployment.ResourceId -split '/' | Select-Object -First 3) -join '/'
+                        $parentResource = [DeploymentCache]::Get($parentResourceId)
+
+                        if ($null -ne $parentResource) {
+                            $resource = [SiteTreeCache]::Get($parentResource.Id, $deployment.Name, 'Sites')
                             if ($null -eq $resource) {
-                                $createSiteArgs = @{
-                                    ParentId = "0"
-                                    Name = $deployment.Name
-                                    Scope = $deployment.Properties.scope
+                                $parameters = @{
+                                    ParentId             = $parentResource.Id
+                                    Name                 = $deployment.Name
+                                    Scope                = $deployment.Properties.scope
                                     ScanConfigurationIds = $deployment.Properties.scanConfigurationIds
                                 }
 
                                 if ($null -ne ($deployment.Properties.emailRecipients)) {
-                                    $createSiteArgs.EmailRecipients = $deployment.Properties.emailRecipients
+                                    $parameters.EmailRecipients = $deployment.Properties.emailRecipients
                                 }
 
                                 if ($null -ne ($deployment.Properties.applicationLogins)) {
-                                    $createSiteArgs.ApplicationLogins = $deployment.Properties.applicationLogins
+                                    $applicationLogins = @()
+
+                                    foreach ($applicationLogin in $deployment.Properties.applicationLogins) {
+                                        $applicationLogins += [PSCustomObject]@{ Label = $applicationLogin.Label; Username = $applicationLogin.Username; Password = $applicationLogin.Password }
+                                    }
+
+                                    $parameters.ApplicationLogins = $applicationLogins
                                 }
 
-                                $resource = New-BurpSuiteSite @createSiteArgs
-                            }
-                        }
+                                $resource = New-BurpSuiteSite @parameters
 
-                        'BurpSuite/Folders' {
-                            $resource = $siteTree.folders | Where-Object { $_.parent_id -eq 0 -and $_.name -eq $deployment.Name }
-                            if ($null -eq $resource) {
-                                $resource = New-BurpSuiteFolder -ParentId 0 -Name $deployment.Name
-                            }
-                        }
-
-                        'BurpSuite/Folders/Sites' {
-                            $parentResourceId = ($deployment.ResourceId -split '/' | Select-Object -First 3) -join '/'
-                            $parentResource = [deploymentCache]::Get($parentResourceId)
-
-                            if ($null -ne $parentResource) {
-                                $resource = $siteTree.sites | Where-Object { $_.parent_id -eq 0 -and $_.name -eq $deployment.Name }
-                                if ($null -eq $resource) {
-                                    $createSiteArgs = @{
-                                        ParentId = $parentResource.Id
-                                        Name = $deployment.Name
-                                        Scope = $deployment.Properties.scope
-                                        ScanConfigurationIds = $deployment.Properties.scanConfigurationIds
-                                    }
-
-                                    if ($null -ne ($deployment.Properties.emailRecipients)) {
-                                        $createSiteArgs.EmailRecipients = $deployment.Properties.emailRecipients
-                                    }
-
-                                    if ($null -ne ($deployment.Properties.applicationLogins)) {
-                                        $createSiteArgs.ApplicationLogins = $deployment.Properties.applicationLogins
-                                    }
-
-                                    $resource = New-BurpSuiteSite @createSiteArgs
-                                }
+                                [SiteTreeCache]::SiteTree = Get-BurpSuiteSiteTree
                             } else {
-                                throw "Resource $($deployment.ResourceId) parent could not be determined."
+                                if ($null -ne ($deployment.Properties.applicationLogins)) {
+                                    foreach ($applicationLogin in $deployment.Properties.applicationLogins) {
+                                        $appPass = ConvertTo-SecureString -String $applicationLogin.password -AsPlainText -Force
+                                        $appCredential =  New-Object -TypeName PSCredential -ArgumentList $applicationLogin.username, $appPass
+                                        $appLogin = $resource.application_logins | Where-Object { $_.label -eq $applicationLogin.label }
+                                        if ($null -eq $appLogin) {
+                                            New-BurpSuiteSiteApplicationLogin -SiteId $resource.id -Label $applicationLogin.label -Credential $appCredential
+                                        } else {
+                                            Update-BurpSuiteSiteApplicationLogin -Id $appLogin.id -Label $applicationLogin.label -Credential $appCredential
+                                        }
+                                    }
+                                }
                             }
-                        }
-
-                        'BurpSuite/ScanConfigurations' {
-                            $resource = $scanConfigurations | Where-Object { $_.name -eq $deployment.Name }
-                            if ($null -eq $resource) {
-                                $tempFile = _createTempFile -InputObject $deployment.Properties.scanConfigurationFragmentJson
-                                $resource = New-BurpSuiteScanConfiguration -Name $deployment.Name -FilePath $tempFile.FullName
-                            }
-                        }
-
-                        default {
-                            throw "Unknown resource type."
+                        } else {
+                            throw "Resource $($deployment.ResourceId) parent could not be determined."
                         }
                     }
 
-                    $deploymentResult = [PSCustomObject]@{
-                        Id                = $resource.Id
-                        ResourceId        = $deployment.ResourceId
-                        ProvisioningState = [ProvisioningState]::Succeeded
+                    'BurpSuite/ScanConfigurations' {
+                        $tempFile = _createTempFile -InputObject $deployment.Properties.scanConfigurationFragmentJson
+
+                        $resource = [ScanConfigurationCache]::Get($deployment.Name)
+                        if ($null -eq $resource) {
+                            $resource = New-BurpSuiteScanConfiguration -Name $deployment.Name -FilePath $tempFile.FullName
+
+                            [ScanConfigurationCache]::ScanConfigurations = @(Get-BurpSuiteScanConfiguration)
+                        } else {
+                            Update-BurpSuiteScanConfiguration -Id $resource.Id -FilePath $tempFile.FullName
+                        }
                     }
 
-                    [deploymentCache]::deployments += $deploymentResult
-
-                    $deploymentResult
+                    default {
+                        throw "Unknown resource type."
+                    }
                 }
+
+                $deploymentResult = [PSCustomObject]@{
+                    Id                = $resource.Id
+                    ResourceId        = $deployment.ResourceId
+                    ProvisioningState = [ProvisioningState]::Succeeded
+                }
+
+                [DeploymentCache]::deployments += $deploymentResult
+
+                $deploymentResult
             }
         } catch {
             throw

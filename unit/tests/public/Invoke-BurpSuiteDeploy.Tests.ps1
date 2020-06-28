@@ -140,18 +140,18 @@ InModuleScope $env:BHProjectName {
 
                 # assert
                 Should -Invoke Invoke-BurpSuiteDeployment -ParameterFilter {
-                    $Deployments[0].ResourceId -eq 'BurpSuite/Folders/Example.com' `
-                        -and $Deployments[0].Properties.ParentId -eq 0
+                    $Deployment.ResourceId -eq 'BurpSuite/Folders/Example.com' `
+                        -and $Deployment.Properties.ParentId -eq 0
                 }
 
                 Should -Invoke Invoke-BurpSuiteDeployment -ParameterFilter {
-                    $Deployments[0].ResourceId -eq 'BurpSuite/Sites/root.example.com' `
-                        -and $Deployments[0].Properties.ParentId -eq 0
+                    $Deployment.ResourceId -eq 'BurpSuite/Sites/root.example.com' `
+                        -and $Deployment.Properties.ParentId -eq 0
                 }
 
                 Should -Invoke Invoke-BurpSuiteDeployment -ParameterFilter {
-                    $Deployments[0].ResourceId -eq 'BurpSuite/ScanConfigurations/Example - Large Scan Configuration' `
-                        -and $Deployments[0].Properties.ParentId -eq 0
+                    $Deployment.ResourceId -eq 'BurpSuite/ScanConfigurations/Example - Large Scan Configuration' `
+                        -and $Deployment.Properties.ParentId -eq 0
                 }
             }
 
