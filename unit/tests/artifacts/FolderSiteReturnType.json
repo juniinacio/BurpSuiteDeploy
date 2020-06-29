@@ -1,0 +1,32 @@
+{
+    "id": "589",
+    "name": "sub.example.com",
+    "parent_id": "587",
+    "scope": {
+        "included_urls": [
+            "https://sub.example.com"
+        ],
+        "excluded_urls": [
+            "https://sub.example.com/wp-admin"
+        ]
+    },
+    "scan_configurations": [
+        {
+            "id": "9c0aba7a-6ce8-4ab9-9b66-ae6d27b0a3dd"
+        }
+    ],
+    "application_logins": [
+        {
+            "id": "6706f25b-31d8-4981-9da2-a66d5d2c434d",
+            "label": "admin",
+            "username": "admin"
+        }
+    ],
+    "ephemeral": false,
+    "email_recipients": [
+        {
+            "id": "132",
+            "email": "foo@example.com"
+        }
+    ]
+}

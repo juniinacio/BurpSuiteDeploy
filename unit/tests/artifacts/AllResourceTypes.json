@@ -12,70 +12,7 @@
             "properties": {
                 "parentId": "0"
             },
-            "resources": [
-                {
-                    "apiVersion": "",
-                    "type": "Sites",
-                    "name": "Example.com/www.example.com",
-                    "dependsOn": [],
-                    "properties": {
-                        "scope": {
-                            "includedUrls": [
-                                "https://www.example.com"
-                            ],
-                            "excludedUrls": []
-                        },
-                        "applicationLogins": [
-                            {
-                                "label": "admin",
-                                "username": "administrator",
-                                "password": "chamgeme"
-                            }
-                        ],
-                        "emailRecipients": [
-                            {
-                                "email": "foo@example.com"
-                            }
-                        ],
-                        "scanConfigurationIds": [
-                            "986e6ff9-1f02-4953-8950-77cf4e473d0a"
-                        ]
-                    },
-                    "resources": [
-                        {}
-                    ]
-                }
-            ]
-        },
-        {
-            "apiVersion": "",
-            "type": "BurpSuite/Sites",
-            "name": "www.example.com",
-            "dependsOn": [],
-            "properties": {
-                "parentId": "0",
-                "scope": {
-                    "includedUrls": [
-                        "https://root.example.com"
-                    ],
-                    "excludedUrls": []
-                },
-                "applicationLogins": [
-                    {
-                        "label": "admin",
-                        "username": "administrator",
-                        "password": "chamgeme"
-                    }
-                ],
-                "email_recipients": [
-                    {
-                        "email": "foo@example.com"
-                    }
-                ]
-            },
-            "resources": [
-                {}
-            ]
+            "resources": []
         },
         {
             "apiVersion": "",
@@ -83,7 +20,42 @@
             "name": "Example - Large Scan Configuration",
             "dependsOn": [],
             "properties": {
-                "scanConfigurationFragmentJson": "{\r\n    \"scanner\":{\r\n        \"issues_reported\":{\r\n            \"scan_type_intrusive_active\":true,\r\n            \"scan_type_javascript_analysis\":false,\r\n            \"scan_type_light_active\":true,\r\n            \"scan_type_medium_active\":true,\r\n            \"scan_type_passive\":true,\r\n            \"select_individual_issues\":false,\r\n            \"selected_issues\":[]\r\n        }\r\n    }\r\n}\r\n"
+                "scanConfigurationFragmentJson": "{\n    \"crawler\":{\n        \"crawl_limits\":{\n            \"maximum_crawl_time\":10,\n            \"maximum_request_count\":0,\n            \"maximum_unique_locations\":5000\n        }\n    }\n}"
+            },
+            "resources": []
+        },
+        {
+            "apiVersion": "",
+            "type": "BurpSuite/Sites",
+            "name": "www.example.com",
+            "dependsOn": [
+                "BurpSuite/ScanConfigurations/Example - Large Scan Configuration"
+            ],
+            "properties": {
+                "parentId": "0",
+                "scope": {
+                    "includedUrls": [
+                        "https://www.example.com"
+                    ],
+                    "excludedUrls": [
+                        "https://www.example.com/wp-admin/"
+                    ]
+                },
+                "applicationLogins": [
+                    {
+                        "label": "admin",
+                        "username": "admin",
+                        "password": "ChangeMe"
+                    }
+                ],
+                "emailRecipients": [
+                    {
+                        "email": "foo@example.com"
+                    }
+                ],
+                "scanConfigurationIds": [
+                    "9c0aba7a-6ce8-4ab9-9b66-ae6d27b0a3dd"
+                ]
             },
             "resources": []
         }

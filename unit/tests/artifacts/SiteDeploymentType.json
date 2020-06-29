@@ -14,7 +14,14 @@
         },
         "emailRecipients": [
             {
-                "email": "support@example.com"
+                "email": "foo@example.com"
+            }
+        ],
+        "applicationLogins": [
+            {
+                "label": "admin",
+                "username": "administrator",
+                "password": "chamgeme"
             }
         ],
         "scanConfigurationIds": [

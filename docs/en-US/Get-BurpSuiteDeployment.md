@@ -8,7 +8,7 @@ schema: 2.0.0
 # Get-BurpSuiteDeployment
 
 ## SYNOPSIS
-{{ Fill in the Synopsis }}
+Reads all deployments from a JSON template file.
 
 ## SYNTAX
 
@@ -17,21 +17,21 @@ Get-BurpSuiteDeployment [-TemplateFile] <String[]> [<CommonParameters>]
 ```
 
 ## DESCRIPTION
-{{ Fill in the Description }}
+Reads all deployments from a JSON template file.
 
 ## EXAMPLES
 
 ### Example 1
 ```powershell
-PS C:\> {{ Add example code here }}
+PS C:\> Get-BurpSuiteDeployment -TemplateFile C:\templates\BurpSuite.json
 ```
 
-{{ Add example description here }}
+This example show how to get all deployment objects out of a file.
 
 ## PARAMETERS
 
 ### -TemplateFile
-{{ Fill TemplateFile Description }}
+Specify the path to your BurpSuite JSON file.
 
 ```yaml
 Type: String[]

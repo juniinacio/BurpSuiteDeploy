@@ -8,7 +8,7 @@ schema: 2.0.0
 # Invoke-BurpSuiteDeployment
 
 ## SYNOPSIS
-{{ Fill in the Synopsis }}
+Invokes one or more deployments.
 
 ## SYNTAX
 
@@ -17,16 +17,16 @@ Invoke-BurpSuiteDeployment [-Deployment] <PSObject> [-WhatIf] [-Confirm] [<Commo
 ```
 
 ## DESCRIPTION
-{{ Fill in the Description }}
+Invokes one or more deployments.
 
 ## EXAMPLES
 
 ### Example 1
 ```powershell
-PS C:\> {{ Add example code here }}
+PS C:\> (Get-BurpSuiteDeployment -TemplateFile C:\templates\BurpSuite.json) | Invoke-BurpSuiteDeployment
 ```
 
-{{ Add example description here }}
+This example show how to execute one or more deployments.
 
 ## PARAMETERS
 
