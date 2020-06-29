@@ -14,7 +14,7 @@
         },
         "emailRecipients": [
             {
-                "email": "support@example.com"
+                "email": "foo@example.com"
             }
         ],
         "applicationLogins": [

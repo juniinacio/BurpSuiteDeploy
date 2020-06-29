@@ -43,6 +43,38 @@ function Invoke-BurpSuiteDeployment {
                             $resource = New-BurpSuiteSite @parameters
 
                             [SiteTreeCache]::SiteTree = Get-BurpSuiteSiteTree
+                        } else {
+                            if ($null -ne ($deployment.Properties.scope)) {
+                                Update-BurpSuiteSiteScope -SiteId $resource.Id -IncludedUrls $deployment.Properties.scope.includedUrls -ExcludedUrls $deployment.Properties.scope.excludedUrls
+                            }
+
+                            if ($null -ne ($deployment.Properties.scanConfigurationIds)) {
+                                Update-BurpSuiteSiteScanConfiguration -Id $resource.Id -ScanConfigurationIds $deployment.Properties.scanConfigurationIds
+                            }
+
+                            if ($null -ne ($deployment.Properties.applicationLogins)) {
+                                foreach ($applicationLogin in $deployment.Properties.applicationLogins) {
+                                    $appPass = ConvertTo-SecureString -String $applicationLogin.password -AsPlainText -Force
+                                    $appCredential = New-Object -TypeName PSCredential -ArgumentList $applicationLogin.username, $appPass
+                                    $appLogin = $resource.application_logins | Where-Object { $_.label -eq $applicationLogin.label }
+                                    if ($null -eq $appLogin) {
+                                        New-BurpSuiteSiteApplicationLogin -SiteId $resource.id -Label $applicationLogin.label -Credential $appCredential | Out-Null
+                                    } else {
+                                        Update-BurpSuiteSiteApplicationLogin -Id $appLogin.id -Label $applicationLogin.label -Credential $appCredential
+                                    }
+                                }
+                            }
+
+                            if ($null -ne ($deployment.Properties.emailRecipients)) {
+                                foreach ($emailRecipient in $deployment.Properties.emailRecipients) {
+                                    $emailRec = $resource.email_recipients | Where-Object { $_.email -eq $emailRecipient.email }
+                                    if ($null -eq $emailRec) {
+                                        New-BurpSuiteSiteEmailRecipient -SiteId $resource.id -EmailRecipient $emailRecipient.email | Out-Null
+                                    } else {
+                                        Update-BurpSuiteSiteEmailRecipient -Id $emailRec.id -Email $emailRecipient.email
+                                    }
+                                }
+                            }
                         }
                     }
 
@@ -87,15 +119,34 @@ function Invoke-BurpSuiteDeployment {
 
                                 [SiteTreeCache]::SiteTree = Get-BurpSuiteSiteTree
                             } else {
+                                if ($null -ne ($deployment.Properties.scope)) {
+                                    Update-BurpSuiteSiteScope -SiteId $resource.Id -IncludedUrls $deployment.Properties.scope.includedUrls -ExcludedUrls $deployment.Properties.scope.excludedUrls
+                                }
+
+                                if ($null -ne ($deployment.Properties.scanConfigurationIds)) {
+                                    Update-BurpSuiteSiteScanConfiguration -Id $resource.Id -ScanConfigurationIds $deployment.Properties.scanConfigurationIds
+                                }
+
                                 if ($null -ne ($deployment.Properties.applicationLogins)) {
                                     foreach ($applicationLogin in $deployment.Properties.applicationLogins) {
                                         $appPass = ConvertTo-SecureString -String $applicationLogin.password -AsPlainText -Force
-                                        $appCredential =  New-Object -TypeName PSCredential -ArgumentList $applicationLogin.username, $appPass
+                                        $appCredential = New-Object -TypeName PSCredential -ArgumentList $applicationLogin.username, $appPass
                                         $appLogin = $resource.application_logins | Where-Object { $_.label -eq $applicationLogin.label }
                                         if ($null -eq $appLogin) {
-                                            New-BurpSuiteSiteApplicationLogin -SiteId $resource.id -Label $applicationLogin.label -Credential $appCredential
+                                            New-BurpSuiteSiteApplicationLogin -SiteId $resource.id -Label $applicationLogin.label -Credential $appCredential | Out-Null
                                         } else {
                                             Update-BurpSuiteSiteApplicationLogin -Id $appLogin.id -Label $applicationLogin.label -Credential $appCredential
+                                        }
+                                    }
+                                }
+
+                                if ($null -ne ($deployment.Properties.emailRecipients)) {
+                                    foreach ($emailRecipient in $deployment.Properties.emailRecipients) {
+                                        $emailRec = $resource.email_recipients | Where-Object { $_.email -eq $emailRecipient.email }
+                                        if ($null -eq $emailRec) {
+                                            New-BurpSuiteSiteEmailRecipient -SiteId $resource.id -EmailRecipient $emailRecipient.email | Out-Null
+                                        } else {
+                                            Update-BurpSuiteSiteEmailRecipient -Id $emailRec.id -Email $emailRecipient.email
                                         }
                                     }
                                 }
@@ -111,7 +162,6 @@ function Invoke-BurpSuiteDeployment {
                         $resource = [ScanConfigurationCache]::Get($deployment.Name)
                         if ($null -eq $resource) {
                             $resource = New-BurpSuiteScanConfiguration -Name $deployment.Name -FilePath $tempFile.FullName
-
                             [ScanConfigurationCache]::ScanConfigurations = @(Get-BurpSuiteScanConfiguration)
                         } else {
                             Update-BurpSuiteScanConfiguration -Id $resource.Id -FilePath $tempFile.FullName
