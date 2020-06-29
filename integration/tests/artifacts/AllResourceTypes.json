@@ -16,15 +16,18 @@
                 {
                     "apiVersion": "",
                     "type": "Sites",
-                    "name": "Example.com",
-                    "dependsOn": [],
+                    "name": "Example.com/sub.example.com",
+                    "dependsOn": [
+                        "BurpSuite/Folders/Example.com",
+                        "BurpSuite/Folders/Example.com"
+                    ],
                     "properties": {
                         "scope": {
                             "includedUrls": [
-                                "https://www.example.com"
+                                "https://sub.example.com"
                             ],
                             "excludedUrls": [
-                                "https://www.example.com/login"
+                                "https://sub.example.com/wp-admin"
                             ]
                         },
                         "applicationLogins": [
@@ -90,9 +93,7 @@
                     "9c0aba7a-6ce8-4ab9-9b66-ae6d27b0a3dd"
                 ]
             },
-            "resources": [
-                {}
-            ]
+            "resources": []
         }
     ],
     "outputs": {}
