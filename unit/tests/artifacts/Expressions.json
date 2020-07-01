@@ -1,0 +1,31 @@
+{
+    "ResourceId": "BurpSuite/Sites/www.example.com",
+    "ResourceType": "BurpSuite/Sites",
+    "Name": "www.example.com",
+    "Properties": {
+        "parentId": "0",
+        "scope": {
+            "includedUrls": [
+                "https://www.example.com"
+            ],
+            "excludedUrls": [
+                "https://www.example.com/wp-admin/"
+            ]
+        },
+        "emailRecipients": [
+            {
+                "email": "foo@example.com"
+            }
+        ],
+        "applicationLogins": [
+            {
+                "label": "admin",
+                "username": "administrator",
+                "password": "chamgeme"
+            }
+        ],
+        "scanConfigurationIds": [
+            "[(reference('BurpSuite/ScanConfigurations/Example - Large Scan Configuration')).id]"
+        ]
+    }
+}

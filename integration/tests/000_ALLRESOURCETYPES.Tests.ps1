@@ -21,14 +21,26 @@ Describe 'Invoke-BurpSuiteDeploy' -Tag 'CD' {
         $testArtifacts = Join-Path -Path $PSScriptRoot -ChildPath 'artifacts'
     }
 
-    Context 'Parent resources' {
+    Context 'Resources' {
         It 'should deploy resources' {
             # Arrange
 
             # Act
-            { Invoke-BurpSuiteDeploy -TemplateFile $testArtifacts\AllResourceTypes.json -Uri $BURPSUITE_URL  -APIkey $BURPSUITE_APIKEY } | Should -Not -Throw
+            $assert = Invoke-BurpSuiteDeploy -TemplateFile $testArtifacts\AllResourceTypes.json -Uri $BURPSUITE_URL  -APIkey $BURPSUITE_APIKEY
 
             # Assert
+            @($assert).ProvisioningState -contains 'Error' | Should -Be $false
         }
+    }
+
+    AfterAll {
+        Connect-BurpSuite -Uri $BURPSUITE_URL  -APIkey $BURPSUITE_APIKEY
+
+        $siteTree = Get-BurpSuiteSiteTree
+
+        $siteTree.folders | Where-Object { $_.Name -eq "Example.com" } | Remove-BurpSuiteFolder -Confirm:$false
+        $siteTree.sites | Where-Object { $_.Name -eq "www.example.com" } | Remove-BurpSuiteSite -Confirm:$false
+
+        Get-BurpSuiteScanConfiguration | Where-Object {$_.name -eq "Example - Large Scan Configuration"} | Remove-BurpSuiteScanConfiguration -Confirm:$false
     }
 }

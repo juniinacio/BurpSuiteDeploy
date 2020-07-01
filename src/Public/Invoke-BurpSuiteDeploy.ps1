@@ -28,13 +28,13 @@ function Invoke-BurpSuiteDeploy {
 
                 $deployments = Get-BurpSuiteDeployment -TemplateFile $TemplateFile
 
-                $results = $deployments | Invoke-BurpSuiteDeployment -Confirm:$false
+                $provisioningResults = $deployments | Invoke-BurpSuiteDeployment -Confirm:$false
 
-                if (@($results).ProvisioningState -contains [ProvisioningState]::Error) {
+                if (@($provisioningResults).ProvisioningState -contains [ProvisioningState]::Error) {
                     Write-Error -Message "Provisioning of one or more resources completed with errors."
                 }
 
-                $results
+                $provisioningResults
             }
         } catch {
             throw

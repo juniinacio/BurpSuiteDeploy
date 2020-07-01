@@ -41,15 +41,10 @@ InModuleScope $env:BHProjectName {
 
             It "should resolve resourceId expressions" {
                 # arrange
-                $resources = @()
-                $resources += [PSCustomObject]@{
-                    Id   = 'BurpSuite/Sites/www.example.com'
-                    Name = 'www.example.com'
-                }
                 $testString = "[resourceId('BurpSuite/Sites', 'www.example.com')]"
 
                 # act
-                $assert = _resolveExpression -InputString $testString -resources $resources
+                $assert = _resolveExpression -InputString $testString
 
                 # assert
                 $assert | Should -Be 'BurpSuite/Sites/www.example.com'
@@ -57,18 +52,25 @@ InModuleScope $env:BHProjectName {
 
             It "should resolve reference expressions" {
                 # arrange
+                $testGuid = ([Guid]::NewGuid()).Guid
+
                 $resources = @()
                 $resources += [PSCustomObject]@{
-                    Id   = 'BurpSuite/Sites/www.example.com'
-                    Name = 'www.example.com'
+                    Id = $testGuid
+                    ResourceId = 'BurpSuite/Sites/www.example.com'
+                    ProvisioningState = 'Succeeded'
+                    Properties = [PSCustomObject]@{
+                        name = 'www.example.com'
+                    }
                 }
-                $testString = "[(reference('BurpSuite/Sites/www.example.com')).Name]"
+
+                $testString = "[(reference('BurpSuite/Sites/www.example.com')).Id]"
 
                 # act
                 $assert = _resolveExpression -InputString $testString -resources $resources
 
                 # assert
-                $assert | Should -Be 'www.example.com'
+                $assert | Should -Be $testGuid
             }
 
             It "should resolve concat expressions" {
@@ -100,18 +102,25 @@ InModuleScope $env:BHProjectName {
 
             It "should resolve complex reference expressions" {
                 # arrange
+                $testGuid = ([Guid]::NewGuid()).Guid
+
                 $resources = @()
                 $resources += [PSCustomObject]@{
-                    Id   = 'BurpSuite/Sites/www.example.com'
-                    Name = 'www.example.com'
+                    Id = $testGuid
+                    ResourceId = 'BurpSuite/Sites/www.example.com'
+                    ProvisioningState = 'Succeeded'
+                    Properties = [PSCustomObject]@{
+                        name = 'www.example.com'
+                    }
                 }
-                $testString = "[(reference((resourceId('BurpSuite/Sites', (concat('www', '.', 'example', '.', 'com')))))).Name]"
+
+                $testString = "[(reference((resourceId('BurpSuite/Sites', (concat('www', '.', 'example', '.', 'com')))))).Id]"
 
                 # act
                 $assert = _resolveExpression -InputString $testString -resources $resources
 
                 # assert
-                $assert | Should -Be 'www.example.com'
+                $assert | Should -Be $testGuid
             }
 
             It "should not resolve certain expressions" {

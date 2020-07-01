@@ -8,6 +8,8 @@ function _testIsExpression {
 }
 
 function _resolveExpression {
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSReviewUnusedParameter", "")]
+    [cmdletbinding()]
     param(
         [object] $inputString,
         [hashtable] $variables,
@@ -37,7 +39,7 @@ function _resolveExpression {
         ) -join '/'
         $resourceId
     }
-    function reference([string]$resourceId) { $resources | Where-Object { $_.Id -eq $resourceId } }
+    function reference([string]$resourceId) { $resources | Where-Object { $_.ResourceId -eq $resourceId } }
 
     $ast = [System.Management.Automation.Language.Parser]::ParseInput($parsedString, [ref]$null, [ref]$null)
 
