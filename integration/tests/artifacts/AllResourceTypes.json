@@ -19,7 +19,7 @@
                     "name": "Example.com/sub.example.com",
                     "dependsOn": [
                         "BurpSuite/Folders/Example.com",
-                        "BurpSuite/Folders/Example.com"
+                        "BurpSuite/ScanConfigurations/Example - Large Scan Configuration"
                     ],
                     "properties": {
                         "scope": {
@@ -43,12 +43,10 @@
                             }
                         ],
                         "scanConfigurationIds": [
-                            "9c0aba7a-6ce8-4ab9-9b66-ae6d27b0a3dd"
+                            "[(reference('BurpSuite/ScanConfigurations/Example - Large Scan Configuration')).Id]"
                         ]
                     },
-                    "resources": [
-                        {}
-                    ]
+                    "resources": []
                 }
             ]
         },
@@ -66,7 +64,9 @@
             "apiVersion": "",
             "type": "BurpSuite/Sites",
             "name": "www.example.com",
-            "dependsOn": [],
+            "dependsOn": [
+                "BurpSuite/ScanConfigurations/Example - Large Scan Configuration"
+            ],
             "properties": {
                 "parentId": "0",
                 "scope": {
@@ -90,7 +90,7 @@
                     }
                 ],
                 "scanConfigurationIds": [
-                    "9c0aba7a-6ce8-4ab9-9b66-ae6d27b0a3dd"
+                    "[(reference('BurpSuite/ScanConfigurations/Example - Large Scan Configuration')).Id]"
                 ]
             },
             "resources": []

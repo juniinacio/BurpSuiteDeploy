@@ -17,6 +17,7 @@ function _cloneObject {
 }
 
 function _convertToHashtable {
+    [OutputType([System.Collections.Hashtable])]
     [cmdletbinding()]
     param(
         [object]$InputObject
@@ -45,6 +46,7 @@ function _createTempFile {
 }
 
 function _sortDeployment {
+    [OutputType([System.Object[]])]
     [cmdletbinding()]
     param(
         [object[]] $Resources
@@ -71,6 +73,7 @@ function _sortDeployment {
 # Thanks to http://stackoverflow.com/questions/8982782/does-anyone-have-a-dependency-graph-and-topological-sorting-code-snippet-for-pow
 # Input is a hashtable of @{ID = @(Depended,On,IDs);...}
 function _sortTopologically {
+    [OutputType([System.Collections.ArrayList])]
     [cmdletbinding()]
     param(
         [Parameter(Mandatory = $true, Position = 0)]
@@ -146,6 +149,7 @@ function _sortTopologically {
 # Thanks to http://stackoverflow.com/questions/8982782/does-anyone-have-a-dependency-graph-and-topological-sorting-code-snippet-for-pow
 # Input is a hashtable of @{ID = @(Depended,On,IDs);...}
 function _sortWithCustomList {
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSReviewUnusedParameter", "")]
     Param (
         [parameter(ValueFromPipeline=$true)]
         [PSObject]

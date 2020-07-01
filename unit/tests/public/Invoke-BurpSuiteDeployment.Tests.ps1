@@ -102,6 +102,7 @@ InModuleScope $env:BHProjectName {
                     $null
                 }
 
+                Mock -CommandName New-BurpSuiteSite
                 Mock -CommandName Update-BurpSuiteSiteScope
                 Mock -CommandName Update-BurpSuiteSiteScanConfiguration
                 Mock -CommandName Update-BurpSuiteSiteApplicationLogin
@@ -137,8 +138,8 @@ InModuleScope $env:BHProjectName {
                         -and $ScanConfigurationIds[0] -eq $testSiteDeployment.Properties.ScanConfigurationIds[0] `
                         -and $EmailRecipients[0].email -eq $testSiteDeployment.Properties.EmailRecipients[0].email `
                         -and $ApplicationLogins[0].label -eq $testSiteDeployment.Properties.ApplicationLogins[0].label `
-                        -and $ApplicationLogins[0].username -eq $testSiteDeployment.Properties.ApplicationLogins[0].username `
-                        -and $ApplicationLogins[0].password -eq $testSiteDeployment.Properties.ApplicationLogins[0].password
+                        -and (($ApplicationLogins[0].Credential).GetNetworkCredential()).username -eq $testSiteDeployment.Properties.ApplicationLogins[0].username `
+                        -and (($ApplicationLogins[0].Credential).GetNetworkCredential()).password -eq $testSiteDeployment.Properties.ApplicationLogins[0].password
                 }
 
                 $deployment.Id | Should -Be $testResult.Id
@@ -220,7 +221,6 @@ InModuleScope $env:BHProjectName {
 
                     Should -Invoke -CommandName Update-BurpSuiteSiteApplicationLogin -ParameterFilter {
                         $Id -eq $testSite.application_logins[0].id `
-                            -and $Label -eq $testSiteDeployment.Properties.applicationLogins[0].label `
                             -and $Credential.GetNetworkCredential().UserName -eq $testSiteDeployment.Properties.applicationLogins[0].username `
                             -and $Credential.GetNetworkCredential().Password -eq $testSiteDeployment.Properties.applicationLogins[0].password
                     }
@@ -505,6 +505,55 @@ InModuleScope $env:BHProjectName {
                 }
             }
 
+            Context "Resolve Expressions" {
+                It "should resolve reference expression for scan configurations" {
+                    # arrange
+                    $testSiteDeployment = ConvertFrom-Json -InputObject (Get-Content -Path $testArtifacts\Expressions.json | Out-String)
+                    $testSite = ConvertFrom-Json -InputObject (Get-Content -Path $testArtifacts\SiteReturnType.json | Out-String)
+
+                    $testScanConfigurationResult = ConvertFrom-Json -InputObject (Get-Content -Path $testArtifacts\DeploymentResultType.json | Out-String)
+                    $testScanConfigurationResult.ResourceId = "BurpSuite/ScanConfigurations/Example - Large Scan Configuration"
+
+                    $testResult = ConvertFrom-Json -InputObject (Get-Content -Path $testArtifacts\DeploymentResultType.json | Out-String)
+                    $testResult.Id = $testSite.Id
+                    $testResult.ResourceId = $testSiteDeployment.ResourceId
+
+                    [DeploymentCache]::Deployments = @(
+                        $testScanConfigurationResult
+                    )
+
+                    Mock -CommandName New-BurpSuiteSite -MockWith {
+                        $testSite
+                    }
+
+                    # act
+                    $deployment = $testSiteDeployment | Invoke-BurpSuiteDeployment
+
+                    # assert
+                    Should -Invoke -CommandName New-BurpSuiteSite -ParameterFilter {
+                        $ParentId -eq 0 `
+                            -and $Name -eq $testSiteDeployment.Name `
+                            -and $Scope.IncludedUrls[0] -eq $testSiteDeployment.Properties.Scope.IncludedUrls[0] `
+                            -and $Scope.ExcludedUrls[0] -eq $testSiteDeployment.Properties.Scope.ExcludedUrls[0] `
+                            -and $ScanConfigurationIds[0] -eq $testScanConfigurationResult.id `
+                            -and $EmailRecipients[0].email -eq $testSiteDeployment.Properties.EmailRecipients[0].email `
+                            -and $ApplicationLogins[0].label -eq $testSiteDeployment.Properties.ApplicationLogins[0].label `
+                            -and (($ApplicationLogins[0].Credential).GetNetworkCredential()).username -eq $testSiteDeployment.Properties.ApplicationLogins[0].username `
+                            -and (($ApplicationLogins[0].Credential).GetNetworkCredential()).password -eq $testSiteDeployment.Properties.ApplicationLogins[0].password
+                    }
+
+                    $deployment.Id | Should -Be $testResult.Id
+                    $deployment.ResourceId | Should -Be $testResult.ResourceId
+                    $deployment.ProvisioningState | Should -Be $testResult.ProvisioningState
+                }
+
+                AfterEach {
+                    [DeploymentCache]::Deployments = @()
+                    [ScanConfigurationCache]::ScanConfigurations = @()
+                    [SiteTreeCache]::SiteTree = $null
+                }
+            }
+
             AfterEach {
                 [DeploymentCache]::Deployments = @()
                 [ScanConfigurationCache]::ScanConfigurations = @()
@@ -573,8 +622,8 @@ InModuleScope $env:BHProjectName {
                         -and $ScanConfigurationIds[0] -eq $testSiteDeployment.Properties.scanConfigurationIds[0] `
                         -and $EmailRecipients[0].email -eq $testSiteDeployment.Properties.EmailRecipients[0].email `
                         -and $ApplicationLogins[0].label -eq $testSiteDeployment.Properties.ApplicationLogins[0].label `
-                        -and $ApplicationLogins[0].username -eq $testSiteDeployment.Properties.ApplicationLogins[0].username `
-                        -and $ApplicationLogins[0].password -eq $testSiteDeployment.Properties.ApplicationLogins[0].password
+                        -and (($ApplicationLogins[0].Credential).GetNetworkCredential()).username -eq $testSiteDeployment.Properties.ApplicationLogins[0].username `
+                        -and (($ApplicationLogins[0].Credential).GetNetworkCredential()).password -eq $testSiteDeployment.Properties.ApplicationLogins[0].password
                 }
 
                 $deployment.Id | Should -Be $testResult.Id
@@ -632,7 +681,6 @@ InModuleScope $env:BHProjectName {
 
                     Should -Invoke -CommandName Update-BurpSuiteSiteApplicationLogin -ParameterFilter {
                         $Id -eq $testSite.application_logins[0].id `
-                            -and $Label -eq $testSiteDeployment.Properties.applicationLogins[0].label `
                             -and $Credential.GetNetworkCredential().UserName -eq $testSiteDeployment.Properties.applicationLogins[0].username `
                             -and $Credential.GetNetworkCredential().Password -eq $testSiteDeployment.Properties.applicationLogins[0].password
                     }

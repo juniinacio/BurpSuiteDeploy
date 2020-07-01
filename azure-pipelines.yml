@@ -44,7 +44,7 @@ stages:
     steps:
     - template: .azure-pipelines/unitTests.yml
       parameters:
-        os: 'Linux'
+        os: 'Linux (PowerShell Core)'
 
   - job: Windows_Phase
     displayName: Build Windows (PowerShell.exe)
@@ -74,7 +74,7 @@ stages:
     steps:
     - template: .azure-pipelines/unitTests.yml
       parameters:
-        os: 'Windows'
+        os: 'Windows (PowerShell Core)'
         pwsh: true
 
     - task: PowerShell@2
@@ -191,9 +191,9 @@ stages:
                   $Env:NUGET_CREDENTIALPROVIDER_SESSIONTOKENCACHE_ENABLED = 'true'
                   $Env:VSS_NUGET_EXTERNAL_FEED_ENDPOINTS = '{{"endpointCredentials": [{{"endpoint":"{0}", "username":"{1}", "password":"{2}"}}]}}' -f $url, $e, $pwd
 
-                  if(-not (Get-PSRepository | ? Name -eq $n)) { Register-PSRepository -Credential $creds -Name $n -SourceLocation $url -PublishLocation $url -InstallationPolicy Trusted -Verbose }
+                  if(-not (Get-PSRepository | ? Name -eq $n)) { Register-PSRepository -Credential $creds -Name $n -SourceLocation $url -PublishLocation $url -InstallationPolicy Trusted }
 
-                  Install-Module -Name "BurpSuite" -Repository $n -Credential $creds -Force -Scope CurrentUser -Verbose
+                  Install-Module -Name "BurpSuite" -Repository $n -Credential $creds -Force -Scope CurrentUser
               pwsh: true
             env:
               ARTIFACTS_PAT: $(ARTIFACTS_PAT)
@@ -240,7 +240,7 @@ stages:
             inputs:
               targetType: 'inline'
               script: |
-                Install-Module -Name Trackyon.Nuget -Scope CurrentUser -Force -Verbose
+                Install-Module -Name Trackyon.Nuget -Scope CurrentUser -Repository PSGallery -Force
                 ConvertTo-NuSpec -Path $env:OUTPUTMODVERDIR/$(ModuleName).psd1
               workingDirectory: '$(Pipeline.Workspace)/module'
               pwsh: true
@@ -277,12 +277,22 @@ stages:
       apiVersion: '$(BurpSuiteAPIVersion)'
       apiUrl: '$(BurpSuiteAPIUri)'
       apiKey: '$(BurpSuiteAPIKey)'
-      os: 'Linux'
+      os: 'Linux (PowerShell Core)'
       moduleName: '$(ModuleName)'
       artifactsUrl: '$(ArtifactsUrl)'
       artifactsEmail: '$(ArtifactsEmail)'
       artifactsPAT: '$(ArtifactsPAT)'
       pwsh: true
+
+  - job: Reconcile
+    displayName: Reconcile
+    dependsOn: 'Linux'
+    pool:
+      vmImage: windows-latest
+
+    steps:
+    - powershell: Start-Sleep -Seconds 120
+      displayName: BurpSuite Reconcile
 
   - template: .azure-pipelines/integrationTests.yml
     parameters:
@@ -294,7 +304,7 @@ stages:
       apiUrl: '$(BurpSuiteAPIUri)'
       apiKey: '$(BurpSuiteAPIKey)'
       os: 'Windows'
-      depends: 'Linux'
+      depends: 'Reconcile'
       moduleName: '$(ModuleName)'
       artifactsUrl: '$(ArtifactsUrl)'
       artifactsEmail: '$(ArtifactsEmail)'
@@ -350,7 +360,7 @@ stages:
             inputs:
               targetType: 'inline'
               script: |
-                Install-Module -Name Trackyon.Nuget -Scope CurrentUser -Force -Verbose
+                Install-Module -Name Trackyon.Nuget -Scope CurrentUser -Repository PSGallery -Force
                 ConvertTo-NuSpec -Path $env:OUTPUTMODVERDIR/$(ModuleName).psd1
 
                 # Load the psd1 file so you can read the version
