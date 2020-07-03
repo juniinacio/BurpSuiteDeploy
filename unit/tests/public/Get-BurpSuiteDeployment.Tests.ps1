@@ -15,7 +15,7 @@ InModuleScope $env:BHProjectName {
                 $deployments = Get-BurpSuiteDeployment -TemplateFile $testTemplateFile
 
                 # assert
-                $deployments.Count | Should -Be 3
+                $deployments.Count | Should -Be 4
             }
         }
 
