@@ -293,6 +293,7 @@ function Invoke-BurpSuiteDeployment {
                         }
 
                         $resource = New-BurpSuiteScheduleItem -SiteId $siteId -ScanConfigurationIds $resolvedScanConfigurationIds -Schedule $deployment.Properties.schedule
+
                         Start-Sleep -Seconds 1
                     }
 
