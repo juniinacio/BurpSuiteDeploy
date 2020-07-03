@@ -1,0 +1,15 @@
+{
+    "ResourceId": "BurpSuite/Sites/www.example.com",
+    "ResourceType": "BurpSuite/ScheduleItems",
+    "Name": "Daily Scan",
+    "Properties": {
+        "siteId": "586",
+        "schedule": {
+            "initialRunTime": "2020-07-03T19:42:28.1024011Z",
+            "rRule": "FREQ=DAILY;INTERVAL=1"
+        },
+        "scanConfigurationIds": [
+            "986e6ff9-1f02-4953-8950-77cf4e473d0a"
+        ]
+    }
+}

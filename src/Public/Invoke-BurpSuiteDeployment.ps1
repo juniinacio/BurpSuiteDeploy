@@ -257,6 +257,45 @@ function Invoke-BurpSuiteDeployment {
                         Start-Sleep -Seconds 1
                     }
 
+                    'BurpSuite/ScheduleItems' {
+                        $siteId = $deployment.Properties.siteId
+                        if ((_testIsExpression -InputString $siteId)) {
+                            $resolvedSiteId = _resolveExpression -inputString $siteId -variables @{} -resources ([DeploymentCache]::Deployments)
+                            if ($null -eq $resolvedSiteId) {
+                                throw "Could not resolve dependency expression $siteId`."
+                            }
+                            $siteId = $resolvedSiteId
+                        }
+
+                        $site = [SiteTreeCache]::Get($siteId, 'Sites')
+                        if ($null -eq $site) {
+                            throw "Could not find site with resource id $siteId`."
+                        }
+
+                        $parameters = @{}
+
+                        $scanConfigurationIds = _tryGetProperty -InputObject $deployment.Properties -PropertyName 'scanConfigurationIds'
+                        if ($null -eq $scanConfigurationIds) {
+                            $scanConfigurationIds = $site.scan_configurations.id
+                        }
+
+                        $resolvedScanConfigurationIds = @()
+                        foreach ($scanConfigurationId in $scanConfigurationIds) {
+                            if ((_testIsExpression -InputString $scanConfigurationId)) {
+                                $resolvedScanConfigurationId = _resolveExpression -inputString $scanConfigurationId -variables @{} -resources ([DeploymentCache]::Deployments)
+                                if ($null -eq $resolvedScanConfigurationId) {
+                                    throw "Could not resolve dependency expression $scanConfigurationId`."
+                                }
+                                $resolvedScanConfigurationIds += $resolvedScanConfigurationId
+                            } else {
+                                $resolvedScanConfigurationIds += $scanConfigurationId
+                            }
+                        }
+
+                        $resource = New-BurpSuiteScheduleItem -SiteId $siteId -ScanConfigurationIds $resolvedScanConfigurationIds -Schedule $deployment.Properties.schedule
+                        Start-Sleep -Seconds 1
+                    }
+
                     default {
                         throw "Unknown resource type."
                     }
