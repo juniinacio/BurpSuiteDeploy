@@ -15,6 +15,8 @@ InModuleScope $env:BHProjectName {
                     $null
                 }
 
+                Mock -CommandName Start-Sleep
+
                 $testArtifacts = Join-Path -Path $PSScriptRoot -ChildPath '..\artifacts'
             }
 
@@ -101,6 +103,8 @@ InModuleScope $env:BHProjectName {
                 Mock -CommandName Get-BurpSuiteScanConfiguration -MockWith {
                     $null
                 }
+
+                Mock -CommandName Start-Sleep
 
                 Mock -CommandName New-BurpSuiteSite
                 Mock -CommandName Update-BurpSuiteSiteScope
@@ -576,6 +580,8 @@ InModuleScope $env:BHProjectName {
                     $null
                 }
 
+                Mock -CommandName Start-Sleep
+
                 Mock -CommandName Update-BurpSuiteSiteScope
                 Mock -CommandName Update-BurpSuiteSiteScanConfiguration
                 Mock -CommandName Update-BurpSuiteSiteApplicationLogin
@@ -1027,6 +1033,8 @@ InModuleScope $env:BHProjectName {
                     $null
                 }
 
+                Mock -CommandName Start-Sleep
+
                 $testArtifacts = Join-Path -Path $PSScriptRoot -ChildPath '..\artifacts'
             }
 
@@ -1123,5 +1131,26 @@ InModuleScope $env:BHProjectName {
                 [ScanConfigurationCache]::ScanConfigurations = @()
             }
         }
+
+        # Context "BurpSuite Schedule Items" {
+        #     BeforeAll {
+        #         [DeploymentCache]::Deployments = @()
+        #         [ScanConfigurationCache]::ScanConfigurations = @()
+
+        #         Mock -CommandName Get-BurpSuiteSiteTree -MockWith {
+        #             [PSCustomObject]@{
+        #                 folders = @([PSCustomObject]@{id = ([guid]::NewGuid()).Guid; parent_id = 0; name = 'Root' })
+        #                 sites   = @()
+        #             }
+        #         }
+
+        #         Mock -CommandName Start-Sleep
+
+        #         $testArtifacts = Join-Path -Path $PSScriptRoot -ChildPath '..\artifacts'
+        #     }
+
+        #     It "It should New-BurpSuiteScheduleItem" {
+        #     }
+        # }
     }
 }

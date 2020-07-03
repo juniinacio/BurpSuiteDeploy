@@ -207,7 +207,7 @@ function Invoke-BurpSuiteDeployment {
                                 }
 
                                 [SiteTreeCache]::SiteTree = Get-BurpSuiteSiteTree
-                                $resource = [SiteTreeCache]::Get(0, $deployment.Name, 'Sites')
+                                $resource = [SiteTreeCache]::Get($parentResource.Id, $deployment.Name, 'Sites')
 
                                 if ($null -ne ($deployment.Properties.applicationLogins)) {
                                     Write-Verbose " Updating application logins..."
@@ -262,7 +262,7 @@ function Invoke-BurpSuiteDeployment {
                     }
                 }
 
-                $provResultProperties = @{
+                $provisioningResult = [PSCustomObject]@{
                     Id                = $resource.Id
                     ResourceId        = $deployment.ResourceId
                     ProvisioningState = [ProvisioningState]::Succeeded
@@ -270,7 +270,7 @@ function Invoke-BurpSuiteDeployment {
                 }
             }
         } catch {
-            $provResultProperties = @{
+            $provisioningResult = [PSCustomObject]@{
                 Id                = $resource.Id
                 ResourceId        = $deployment.ResourceId
                 ProvisioningState = [ProvisioningState]::Error
@@ -279,7 +279,6 @@ function Invoke-BurpSuiteDeployment {
             }
         }
 
-        $provisioningResult = [PSCustomObject]$provResultProperties
         [DeploymentCache]::Deployments += $provisioningResult
         $provisioningResult
     }
