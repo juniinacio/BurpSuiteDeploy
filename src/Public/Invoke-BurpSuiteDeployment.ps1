@@ -292,6 +292,7 @@ function Invoke-BurpSuiteDeployment {
                             }
                         }
 
+                        Write-Verbose "Creating schedule item $($deployment.Name)`..."
                         $resource = New-BurpSuiteScheduleItem -SiteId $siteId -ScanConfigurationIds $resolvedScanConfigurationIds -Schedule $deployment.Properties.schedule
 
                         Start-Sleep -Seconds 1
@@ -324,5 +325,6 @@ function Invoke-BurpSuiteDeployment {
     }
 
     end {
+        [DeploymentCache]::Deployments = @()
     }
 }
