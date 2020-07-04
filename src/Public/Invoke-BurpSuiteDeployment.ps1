@@ -11,6 +11,7 @@ function Invoke-BurpSuiteDeployment {
     begin {
         [SiteTreeCache]::SiteTree = Get-BurpSuiteSiteTree
         [ScanConfigurationCache]::ScanConfigurations = @(Get-BurpSuiteScanConfiguration)
+        [ScheduleItemCache]::ScheduleItems = @(Get-BurpSuiteScheduleItem -Fields id, schedule, site)
     }
 
     process {
@@ -272,8 +273,6 @@ function Invoke-BurpSuiteDeployment {
                             throw "Could not find site with resource id $siteId`."
                         }
 
-                        $parameters = @{}
-
                         $scanConfigurationIds = _tryGetProperty -InputObject $deployment.Properties -PropertyName 'scanConfigurationIds'
                         if ($null -eq $scanConfigurationIds) {
                             $scanConfigurationIds = $site.scan_configurations.id
@@ -292,8 +291,17 @@ function Invoke-BurpSuiteDeployment {
                             }
                         }
 
-                        Write-Verbose "Creating schedule item $($deployment.Name)`..."
-                        $resource = New-BurpSuiteScheduleItem -SiteId $siteId -ScanConfigurationIds $resolvedScanConfigurationIds -Schedule $deployment.Properties.schedule
+                        $recurrenceRule = _tryGetProperty -InputObject $deployment.Properties.schedule -PropertyName 'rRule'
+                        if ($null -ne $recurrenceRule) {
+                            $resource = [ScheduleItemCache]::Get($siteId) | Where-Object { $_.schedule.rrule -eq $recurrenceRule } | Select-Object -First 1
+                        } else {
+                            $resource = $null
+                        }
+
+                        if ($null -eq $resource) {
+                            Write-Verbose "Creating schedule item $($deployment.Name)`..."
+                            $resource = New-BurpSuiteScheduleItem -SiteId $siteId -ScanConfigurationIds $resolvedScanConfigurationIds -Schedule $deployment.Properties.schedule
+                        }
 
                         Start-Sleep -Seconds 1
                     }

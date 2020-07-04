@@ -106,7 +106,7 @@
             "properties": {
                 "siteId": "[(reference('BurpSuite/Folders/Example/Sites/sub.example.com')).Id]",
                 "schedule": {
-                    "initialRunTime": "2020-07-03T19:42:28.1024011Z",
+                    "initialRunTime": "",
                     "rRule": "FREQ=DAILY;INTERVAL=1"
                 },
                 "scanConfigurationIds": [
@@ -125,7 +125,7 @@
             "properties": {
                 "siteId": "[(reference('BurpSuite/Sites/www.example.com')).Id]",
                 "schedule": {
-                    "initialRunTime": "2020-07-03T19:42:28.1024011Z",
+                    "initialRunTime": "",
                     "rRule": "FREQ=DAILY;INTERVAL=1"
                 }
             }
