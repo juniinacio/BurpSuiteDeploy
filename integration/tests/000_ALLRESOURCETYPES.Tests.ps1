@@ -38,9 +38,17 @@ Describe 'Invoke-BurpSuiteDeploy' -Tag 'CD' {
 
         $siteTree = Get-BurpSuiteSiteTree
 
+        Get-BurpSuiteScan | Where-Object { $_.status -in @("running", "queued") } | Stop-BurpSuiteScan -Confirm:$false
+
         $siteTree.folders | Where-Object { $_.Name -eq "Example" } | Remove-BurpSuiteFolder -Confirm:$false
         $siteTree.sites | Where-Object { $_.Name -eq "www.example.com" } | Remove-BurpSuiteSite -Confirm:$false
 
-        Get-BurpSuiteScanConfiguration | Where-Object {$_.name -eq "Example - Large Scan Configuration"} | Remove-BurpSuiteScanConfiguration -Confirm:$false
+        Get-BurpSuiteScheduleItem -Fields id, schedule, site | Where-Object { $_.site.name -like "*.example.com" } | Remove-BurpSuiteScheduleItem -Confirm:$false
+
+        Start-Sleep -Seconds 5
+
+        try {
+            Get-BurpSuiteScanConfiguration | Where-Object { $_.name -eq "Example - Large Scan Configuration" } | Remove-BurpSuiteScanConfiguration -Confirm:$false -ErrorAction SilentlyContinue
+        } catch {}
     }
 }

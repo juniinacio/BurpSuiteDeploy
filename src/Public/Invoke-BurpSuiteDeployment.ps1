@@ -310,6 +310,15 @@ function Invoke-BurpSuiteDeployment {
 
                             $initialRunTime = _tryGetProperty -InputObject $deployment.Properties.schedule -PropertyName 'initialRunTime'
                             if (-not ([string]::IsNullOrEmpty($initialRunTime))) {
+                                $dateTimeNow = Get-Date
+                                $initialRunTimeDate = [DateTime]::SpecifyKind($initialRunTime, [DateTimeKind]::Utc)
+                                # Correct initial run time if date is in past
+                                if ($initialRunTimeDate -lt $dateTimeNow) {
+                                    $dateTimeTomorrow = $dateTimeNow.AddHours(24)
+                                    $newInitialRunTimeDate = (Get-Date -Day $dateTimeTomorrow.Day -Month $dateTimeTomorrow.Month -Year $dateTimeTomorrow.Year -Hour $initialRunTimeDate.Hour -Minute $initialRunTimeDate.Minute -Second $initialRunTimeDate.Second)
+                                    $newInitialRunTimeDate = [DateTime]::SpecifyKind($newInitialRunTimeDate, [DateTimeKind]::Utc)
+                                    $initialRunTime = Get-Date -Date $newInitialRunTimeDate -Format o
+                                }
                                 $parameters.initialRunTime = $initialRunTime
                             }
 
