@@ -284,16 +284,6 @@ stages:
       artifactsPAT: '$(ArtifactsPAT)'
       pwsh: true
 
-  - job: Reconcile
-    displayName: Reconcile
-    dependsOn: 'Linux'
-    pool:
-      vmImage: windows-latest
-
-    steps:
-    - powershell: Start-Sleep -Seconds 120
-      displayName: BurpSuite Reconcile
-
   - template: .azure-pipelines/integrationTests.yml
     parameters:
       name: 'Windows'
@@ -304,7 +294,7 @@ stages:
       apiUrl: '$(BurpSuiteAPIUri)'
       apiKey: '$(BurpSuiteAPIKey)'
       os: 'Windows'
-      depends: 'Reconcile'
+      depends: 'Linux'
       moduleName: '$(ModuleName)'
       artifactsUrl: '$(ArtifactsUrl)'
       artifactsEmail: '$(ArtifactsEmail)'
