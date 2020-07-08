@@ -1211,7 +1211,7 @@ InModuleScope $env:BHProjectName {
                 Should -Invoke -CommandName New-BurpSuiteScheduleItem -ParameterFilter {
                     $SiteId -eq $testScheduleDeployment.Properties.siteId `
                         -and $ScanConfigurationIds[0] -eq $testScheduleDeployment.Properties.scanConfigurationIds[0] `
-                        -and $Schedule.InitialRunTime -gt (Get-Date -Date $testScheduleDeployment.Properties.schedule.initialRunTime) ` # TODO: Update assertion
+                        -and $Schedule.InitialRunTime -gt (Get-Date -Date $testScheduleDeployment.Properties.schedule.initialRunTime) `
                         -and $Schedule.RRule -eq $testScheduleDeployment.Properties.schedule.rRule
                 }
 
