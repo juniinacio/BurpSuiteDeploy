@@ -263,7 +263,7 @@ function Invoke-BurpSuiteDeployment {
                         if ((_testIsExpression -InputString $siteId)) {
                             $resolvedSiteId = _resolveExpression -inputString $siteId -variables @{} -resources ([DeploymentCache]::Deployments)
                             if ($null -eq $resolvedSiteId) {
-                                throw "Could not resolve dependency expression $siteId`."
+                                throw "Could not resolve expression $siteId`."
                             }
                             $siteId = $resolvedSiteId
                         }
@@ -283,7 +283,7 @@ function Invoke-BurpSuiteDeployment {
                             if ((_testIsExpression -InputString $scanConfigurationId)) {
                                 $resolvedScanConfigurationId = _resolveExpression -inputString $scanConfigurationId -variables @{} -resources ([DeploymentCache]::Deployments)
                                 if ($null -eq $resolvedScanConfigurationId) {
-                                    throw "Could not resolve dependency expression $scanConfigurationId`."
+                                    throw "Could not resolve expression $scanConfigurationId`."
                                 }
                                 $resolvedScanConfigurationIds += $resolvedScanConfigurationId
                             } else {
@@ -292,15 +292,30 @@ function Invoke-BurpSuiteDeployment {
                         }
 
                         $recurrenceRule = _tryGetProperty -InputObject $deployment.Properties.schedule -PropertyName 'rRule'
-                        if ($null -ne $recurrenceRule) {
+                        if (-not ([string]::IsNullOrEmpty($recurrenceRule))) {
                             $resource = [ScheduleItemCache]::Get($siteId) | Where-Object { $_.schedule.rrule -eq $recurrenceRule } | Select-Object -First 1
                         } else {
                             $resource = $null
                         }
 
                         if ($null -eq $resource) {
-                            Write-Verbose "Creating schedule item $($deployment.Name)`..."
-                            $resource = New-BurpSuiteScheduleItem -SiteId $siteId -ScanConfigurationIds $resolvedScanConfigurationIds -Schedule $deployment.Properties.schedule
+                            Write-Verbose "Creating schedule item $($deployment.Name), site $siteId`..."
+
+                            $parameters = @{}
+
+                            $recurrenceRule = _tryGetProperty -InputObject $deployment.Properties.schedule -PropertyName 'rRule'
+                            if (-not ([string]::IsNullOrEmpty($recurrenceRule))) {
+                                $parameters.rrule = $recurrenceRule
+                            }
+
+                            $initialRunTime = _tryGetProperty -InputObject $deployment.Properties.schedule -PropertyName 'initialRunTime'
+                            if (-not ([string]::IsNullOrEmpty($initialRunTime))) {
+                                $parameters.initialRunTime = $initialRunTime
+                            }
+
+                            $schedule = [PSCustomObject]$parameters
+
+                            $resource = New-BurpSuiteScheduleItem -SiteId $siteId -ScanConfigurationIds $resolvedScanConfigurationIds -Schedule $schedule
                         }
 
                         Start-Sleep -Seconds 1
