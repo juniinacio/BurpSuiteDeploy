@@ -7,7 +7,7 @@
         {
             "apiVersion": "",
             "type": "BurpSuite/Folders",
-            "name": "Example.com",
+            "name": "Example",
             "dependsOn": [],
             "properties": {
                 "parentId": "0"
@@ -16,9 +16,9 @@
                 {
                     "apiVersion": "",
                     "type": "Sites",
-                    "name": "Example.com/sub.example.com",
+                    "name": "Example/sub.example.com",
                     "dependsOn": [
-                        "BurpSuite/Folders/Example.com",
+                        "BurpSuite/Folders/Example",
                         "BurpSuite/ScanConfigurations/Example - Large Scan Configuration"
                     ],
                     "properties": {
@@ -94,6 +94,41 @@
                 ]
             },
             "resources": []
+        },
+        {
+            "apiVersion": "",
+            "type": "BurpSuite/ScheduleItems",
+            "name": "Daily Scan",
+            "dependsOn": [
+                "BurpSuite/ScanConfigurations/Example - Large Scan Configuration",
+                "BurpSuite/Folders/Example/Sites/sub.example.com"
+            ],
+            "properties": {
+                "siteId": "[(reference('BurpSuite/Folders/Example/Sites/sub.example.com')).Id]",
+                "schedule": {
+                    "initialRunTime": "",
+                    "rRule": "FREQ=DAILY;INTERVAL=1"
+                },
+                "scanConfigurationIds": [
+                    "[(reference('BurpSuite/ScanConfigurations/Example - Large Scan Configuration')).Id]"
+                ]
+            }
+        },
+        {
+            "apiVersion": "",
+            "type": "BurpSuite/ScheduleItems",
+            "name": "Daily Scan",
+            "dependsOn": [
+                "BurpSuite/ScanConfigurations/Example - Large Scan Configuration",
+                "BurpSuite/Sites/www.example.com"
+            ],
+            "properties": {
+                "siteId": "[(reference('BurpSuite/Sites/www.example.com')).Id]",
+                "schedule": {
+                    "initialRunTime": "",
+                    "rRule": "FREQ=DAILY;INTERVAL=1"
+                }
+            }
         }
     ],
     "outputs": {}

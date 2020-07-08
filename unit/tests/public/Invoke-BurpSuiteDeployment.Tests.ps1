@@ -15,6 +15,12 @@ InModuleScope $env:BHProjectName {
                     $null
                 }
 
+                Mock -CommandName Get-BurpSuiteScheduleItem -MockWith {
+                    $null
+                }
+
+                Mock -CommandName Start-Sleep
+
                 $testArtifacts = Join-Path -Path $PSScriptRoot -ChildPath '..\artifacts'
             }
 
@@ -101,6 +107,12 @@ InModuleScope $env:BHProjectName {
                 Mock -CommandName Get-BurpSuiteScanConfiguration -MockWith {
                     $null
                 }
+
+                Mock -CommandName Get-BurpSuiteScheduleItem -MockWith {
+                    $null
+                }
+
+                Mock -CommandName Start-Sleep
 
                 Mock -CommandName New-BurpSuiteSite
                 Mock -CommandName Update-BurpSuiteSiteScope
@@ -576,6 +588,12 @@ InModuleScope $env:BHProjectName {
                     $null
                 }
 
+                Mock -CommandName Get-BurpSuiteScheduleItem -MockWith {
+                    $null
+                }
+
+                Mock -CommandName Start-Sleep
+
                 Mock -CommandName Update-BurpSuiteSiteScope
                 Mock -CommandName Update-BurpSuiteSiteScanConfiguration
                 Mock -CommandName Update-BurpSuiteSiteApplicationLogin
@@ -1027,6 +1045,12 @@ InModuleScope $env:BHProjectName {
                     $null
                 }
 
+                Mock -CommandName Get-BurpSuiteScheduleItem -MockWith {
+                    $null
+                }
+
+                Mock -CommandName Start-Sleep
+
                 $testArtifacts = Join-Path -Path $PSScriptRoot -ChildPath '..\artifacts'
             }
 
@@ -1121,6 +1145,129 @@ InModuleScope $env:BHProjectName {
             AfterEach {
                 [DeploymentCache]::Deployments = @()
                 [ScanConfigurationCache]::ScanConfigurations = @()
+            }
+        }
+
+        Context "BurpSuite Schedule Items" {
+            BeforeAll {
+                [DeploymentCache]::Deployments = @()
+
+                Mock -CommandName Get-BurpSuiteSiteTree -MockWith {
+                    [PSCustomObject]@{
+                        folders = @([PSCustomObject]@{id = ([guid]::NewGuid()).Guid; parent_id = 0; name = 'Root' })
+                        sites   = @()
+                    }
+                }
+
+                Mock -CommandName Get-BurpSuiteScanConfiguration -MockWith {
+                    $null
+                }
+
+                Mock -CommandName Get-BurpSuiteScheduleItem -MockWith {
+                    $null
+                }
+
+                Mock -CommandName Start-Sleep
+
+                $testArtifacts = Join-Path -Path $PSScriptRoot -ChildPath '..\artifacts'
+            }
+
+            It "It should call New-BurpSuiteScheduleItem when resource does not exist" {
+                # arrange
+                $testSiteResult = ConvertFrom-Json -InputObject (Get-Content -Path $testArtifacts\SiteDeploymentType.json | Out-String)
+                $testSite = ConvertFrom-Json -InputObject (Get-Content -Path $testArtifacts\SiteReturnType.json | Out-String)
+
+                $testScheduleDeployment = ConvertFrom-Json -InputObject (Get-Content -Path $testArtifacts\ScheduleItemDeploymentType.json | Out-String)
+
+                $testSchedule = ConvertFrom-Json -InputObject (Get-Content -Path $testArtifacts\ScheduleItemReturnType.json | Out-String)
+
+                $testResult = ConvertFrom-Json -InputObject (Get-Content -Path $testArtifacts\DeploymentResultType.json | Out-String)
+                $testResult.Id = $testSchedule.Id
+                $testResult.ResourceId = $testScheduleDeployment.ResourceId
+
+                [DeploymentCache]::Deployments = @(
+                    $testSiteResult
+                )
+
+                Mock -CommandName Get-BurpSuiteSiteTree -MockWith {
+                    [PSCustomObject]@{
+                        folders = @(
+                            [PSCustomObject]@{id = [guid]::NewGuid(); parent_id = 0; name = 'Root' },
+                            $testFolder
+                        )
+                        sites   = @(
+                            $testSite
+                        )
+                    }
+                }
+
+                Mock -CommandName New-BurpSuiteScheduleItem -MockWith {
+                    $testSchedule
+                }
+
+                # act
+                $deployment = $testScheduleDeployment | Invoke-BurpSuiteDeployment
+
+                Should -Invoke -CommandName New-BurpSuiteScheduleItem -ParameterFilter {
+                    $SiteId -eq $testScheduleDeployment.Properties.siteId `
+                        -and $ScanConfigurationIds[0] -eq $testScheduleDeployment.Properties.scanConfigurationIds[0] `
+                        -and $Schedule.InitialRunTime -eq $testScheduleDeployment.Properties.schedule.initialRunTime `
+                        -and $Schedule.RRule -eq $testScheduleDeployment.Properties.schedule.rRule
+                }
+
+                $deployment.Id | Should -Be $testResult.Id
+                $deployment.ResourceId | Should -Be $testResult.ResourceId
+                $deployment.ProvisioningState | Should -Be $testResult.ProvisioningState
+            }
+
+            It "It should call not New-BurpSuiteScheduleItem when resource does exist" {
+                # arrange
+                $testSiteResult = ConvertFrom-Json -InputObject (Get-Content -Path $testArtifacts\SiteDeploymentType.json | Out-String)
+                $testSite = ConvertFrom-Json -InputObject (Get-Content -Path $testArtifacts\SiteReturnType.json | Out-String)
+
+                $testScheduleDeployment = ConvertFrom-Json -InputObject (Get-Content -Path $testArtifacts\ScheduleItemDeploymentType.json | Out-String)
+
+                $testSchedule = ConvertFrom-Json -InputObject (Get-Content -Path $testArtifacts\ScheduleItemReturnType.json | Out-String)
+
+                $testResult = ConvertFrom-Json -InputObject (Get-Content -Path $testArtifacts\DeploymentResultType.json | Out-String)
+                $testResult.Id = $testSchedule.Id
+                $testResult.ResourceId = $testScheduleDeployment.ResourceId
+
+                [DeploymentCache]::Deployments = @(
+                    $testSiteResult
+                )
+
+                Mock -CommandName Get-BurpSuiteScheduleItem -MockWith {
+                    $testSchedule
+                }
+
+                Mock -CommandName Get-BurpSuiteSiteTree -MockWith {
+                    [PSCustomObject]@{
+                        folders = @(
+                            [PSCustomObject]@{id = [guid]::NewGuid(); parent_id = 0; name = 'Root' },
+                            $testFolder
+                        )
+                        sites   = @(
+                            $testSite
+                        )
+                    }
+                }
+
+                Mock -CommandName New-BurpSuiteScheduleItem
+
+                # act
+                $deployment = $testScheduleDeployment | Invoke-BurpSuiteDeployment
+
+                Should -Invoke -CommandName New-BurpSuiteScheduleItem -Times 0 -Scope It
+
+                $deployment.Id | Should -Be $testResult.Id
+                $deployment.ResourceId | Should -Be $testResult.ResourceId
+                $deployment.ProvisioningState | Should -Be $testResult.ProvisioningState
+            }
+
+            AfterEach {
+                [DeploymentCache]::Deployments = @()
+                [SiteTreeCache]::SiteTree = $null
             }
         }
     }

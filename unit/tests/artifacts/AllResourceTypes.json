@@ -58,6 +58,25 @@
                 ]
             },
             "resources": []
+        },
+        {
+            "apiVersion": "",
+            "type": "BurpSuite/ScheduleItems",
+            "name": "Daily Scan",
+            "dependsOn": [
+                "BurpSuite/ScanConfigurations/Example - Large Scan Configuration",
+                "BurpSuite/Sites/www.example.com"
+            ],
+            "properties": {
+                "siteId": "[(reference('BurpSuite/Sites/www.example.com')).Id]",
+                "schedule": {
+                    "initialRunTime": "2020-07-03T19:42:28.1024011Z",
+                    "rRule": "FREQ=DAILY;INTERVAL=1"
+                },
+                "scanConfigurationIds": [
+                    "[(reference('BurpSuite/ScanConfigurations/Example - Large Scan Configuration')).Id]"
+                ]
+            }
         }
     ],
     "outputs": {}

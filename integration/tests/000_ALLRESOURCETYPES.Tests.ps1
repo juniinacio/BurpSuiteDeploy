@@ -38,7 +38,7 @@ Describe 'Invoke-BurpSuiteDeploy' -Tag 'CD' {
 
         $siteTree = Get-BurpSuiteSiteTree
 
-        $siteTree.folders | Where-Object { $_.Name -eq "Example.com" } | Remove-BurpSuiteFolder -Confirm:$false
+        $siteTree.folders | Where-Object { $_.Name -eq "Example" } | Remove-BurpSuiteFolder -Confirm:$false
         $siteTree.sites | Where-Object { $_.Name -eq "www.example.com" } | Remove-BurpSuiteSite -Confirm:$false
 
         Get-BurpSuiteScanConfiguration | Where-Object {$_.name -eq "Example - Large Scan Configuration"} | Remove-BurpSuiteScanConfiguration -Confirm:$false
