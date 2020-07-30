@@ -28,7 +28,7 @@ function Invoke-BurpSuiteDeploy {
 
                 $deployments = Get-BurpSuiteDeployment -TemplateFile $TemplateFile
 
-                $provisioningResults = $deployments | Invoke-BurpSuiteDeployment -Confirm:$false
+                $provisioningResults = $deployments | New-BurpSuiteResource -Confirm:$false
 
                 if (@($provisioningResults).ProvisioningState -contains [ProvisioningState]::Error) {
                     Write-Error -Message "Provisioning of one or more resources completed with errors."

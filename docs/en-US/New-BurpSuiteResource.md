@@ -5,7 +5,7 @@ online version: https://github.com/juniinacio/BurpSuiteDeploy
 schema: 2.0.0
 ---
 
-# Invoke-BurpSuiteDeployment
+# New-BurpSuiteResource
 
 ## SYNOPSIS
 Invokes one or more deployments.
@@ -13,20 +13,20 @@ Invokes one or more deployments.
 ## SYNTAX
 
 ```
-Invoke-BurpSuiteDeployment [-Deployment] <PSObject> [-WhatIf] [-Confirm] [<CommonParameters>]
+New-BurpSuiteResource [-InputObject] <PSObject> [-WhatIf] [-Confirm] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
-Invokes one or more deployments.
+Creates one or more resources.
 
 ## EXAMPLES
 
 ### Example 1
 ```powershell
-PS C:\> (Get-BurpSuiteDeployment -TemplateFile C:\templates\BurpSuite.json) | Invoke-BurpSuiteDeployment
+PS C:\> (Get-BurpSuiteDeployment -TemplateFile C:\templates\BurpSuite.json) | New-BurpSuiteResource
 ```
 
-This example show how to execute one or more deployments.
+This example shows how to create one or more resources.
 
 ## PARAMETERS
 
@@ -45,8 +45,8 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -Deployment
-{{ Fill Deployment Description }}
+### -InputObject
+Specifies a template resource to create.
 
 ```yaml
 Type: PSObject

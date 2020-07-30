@@ -1,5 +1,5 @@
 InModuleScope $env:BHProjectName {
-    Describe "Invoke-BurpSuiteDeployment" {
+    Describe "New-BurpSuiteResource" {
         Context "BurpSuite Folders" {
             BeforeAll {
                 [DeploymentCache]::Deployments = @()
@@ -41,7 +41,7 @@ InModuleScope $env:BHProjectName {
                 }
 
                 # act
-                $deployment = $testFolderDeployment | Invoke-BurpSuiteDeployment
+                $deployment = $testFolderDeployment | New-BurpSuiteResource
 
                 # assert
                 Should -Invoke -CommandName New-BurpSuiteFolder -ParameterFilter {
@@ -76,7 +76,7 @@ InModuleScope $env:BHProjectName {
                 Mock -CommandName New-BurpSuiteFolder
 
                 # act
-                $deployment = $testFolderDeployment | Invoke-BurpSuiteDeployment
+                $deployment = $testFolderDeployment | New-BurpSuiteResource
 
                 # assert
                 Should -Invoke -CommandName New-BurpSuiteFolder -Times 0 -Scope It
@@ -139,7 +139,7 @@ InModuleScope $env:BHProjectName {
                 }
 
                 # act
-                $deployment = $testSiteDeployment | Invoke-BurpSuiteDeployment
+                $deployment = $testSiteDeployment | New-BurpSuiteResource
 
                 # assert
                 Should -Invoke -CommandName New-BurpSuiteSite -ParameterFilter {
@@ -182,7 +182,7 @@ InModuleScope $env:BHProjectName {
                 Mock -CommandName New-BurpSuiteSite
 
                 # act
-                $deployment = $testSiteDeployment | Invoke-BurpSuiteDeployment
+                $deployment = $testSiteDeployment | New-BurpSuiteResource
 
                 # assert
                 Should -Invoke -CommandName New-BurpSuiteSite -Times 0 -Scope It
@@ -225,7 +225,7 @@ InModuleScope $env:BHProjectName {
                     Mock -CommandName Update-BurpSuiteSiteApplicationLogin
 
                     # act
-                    $deployment = $testSiteDeployment | Invoke-BurpSuiteDeployment
+                    $deployment = $testSiteDeployment | New-BurpSuiteResource
 
                     # assert
                     Should -Invoke -CommandName New-BurpSuiteFolder -Times 0 -Scope It
@@ -275,7 +275,7 @@ InModuleScope $env:BHProjectName {
                     Mock -CommandName New-BurpSuiteSiteApplicationLogin
 
                     # act
-                    $deployment = $testSiteDeployment | Invoke-BurpSuiteDeployment
+                    $deployment = $testSiteDeployment | New-BurpSuiteResource
 
                     # assert
                     Should -Invoke -CommandName New-BurpSuiteFolder -Times 0 -Scope It
@@ -333,7 +333,7 @@ InModuleScope $env:BHProjectName {
                     Mock -CommandName Update-BurpSuiteSiteEmailRecipient
 
                     # act
-                    $deployment = $testSiteDeployment | Invoke-BurpSuiteDeployment
+                    $deployment = $testSiteDeployment | New-BurpSuiteResource
 
                     # assert
                     Should -Invoke -CommandName New-BurpSuiteFolder -Times 0 -Scope It
@@ -382,7 +382,7 @@ InModuleScope $env:BHProjectName {
                     Mock -CommandName New-BurpSuiteSiteEmailRecipient
 
                     # act
-                    $deployment = $testSiteDeployment | Invoke-BurpSuiteDeployment
+                    $deployment = $testSiteDeployment | New-BurpSuiteResource
 
                     # assert
                     Should -Invoke -CommandName New-BurpSuiteFolder -Times 0 -Scope It
@@ -438,7 +438,7 @@ InModuleScope $env:BHProjectName {
                     Mock -CommandName Update-BurpSuiteSiteScope
 
                     # act
-                    $deployment = $testSiteDeployment | Invoke-BurpSuiteDeployment
+                    $deployment = $testSiteDeployment | New-BurpSuiteResource
 
                     # assert
                     Should -Invoke -CommandName New-BurpSuiteFolder -Times 0 -Scope It
@@ -494,7 +494,7 @@ InModuleScope $env:BHProjectName {
                     Mock -CommandName Update-BurpSuiteSiteScanConfiguration
 
                     # act
-                    $deployment = $testSiteDeployment | Invoke-BurpSuiteDeployment
+                    $deployment = $testSiteDeployment | New-BurpSuiteResource
 
                     # assert
                     Should -Invoke -CommandName New-BurpSuiteFolder -Times 0 -Scope It
@@ -539,7 +539,7 @@ InModuleScope $env:BHProjectName {
                     }
 
                     # act
-                    $deployment = $testSiteDeployment | Invoke-BurpSuiteDeployment
+                    $deployment = $testSiteDeployment | New-BurpSuiteResource
 
                     # assert
                     Should -Invoke -CommandName New-BurpSuiteSite -ParameterFilter {
@@ -630,7 +630,7 @@ InModuleScope $env:BHProjectName {
                 }
 
                 # act
-                $deployment = $testSiteDeployment | Invoke-BurpSuiteDeployment
+                $deployment = $testSiteDeployment | New-BurpSuiteResource
 
                 Should -Invoke -CommandName New-BurpSuiteSite -ParameterFilter {
                     $ParentId -eq $testFolderResult.Id `
@@ -691,7 +691,7 @@ InModuleScope $env:BHProjectName {
                     Mock -CommandName Update-BurpSuiteSiteApplicationLogin
 
                     # act
-                    $deployment = $testSiteDeployment | Invoke-BurpSuiteDeployment
+                    $deployment = $testSiteDeployment | New-BurpSuiteResource
 
                     # assert
                     Should -Invoke -CommandName New-BurpSuiteFolder -Times 0 -Scope It
@@ -750,7 +750,7 @@ InModuleScope $env:BHProjectName {
                     Mock -CommandName New-BurpSuiteSiteApplicationLogin
 
                     # act
-                    $deployment = $testSiteDeployment | Invoke-BurpSuiteDeployment
+                    $deployment = $testSiteDeployment | New-BurpSuiteResource
 
                     # assert
                     Should -Invoke -CommandName New-BurpSuiteFolder -Times 0 -Scope It
@@ -817,7 +817,7 @@ InModuleScope $env:BHProjectName {
                     Mock -CommandName Update-BurpSuiteSiteEmailRecipient
 
                     # act
-                    $deployment = $testSiteDeployment | Invoke-BurpSuiteDeployment
+                    $deployment = $testSiteDeployment | New-BurpSuiteResource
 
                     # assert
                     Should -Invoke -CommandName New-BurpSuiteFolder -Times 0 -Scope It
@@ -875,7 +875,7 @@ InModuleScope $env:BHProjectName {
                     Mock -CommandName New-BurpSuiteSiteEmailRecipient
 
                     # act
-                    $deployment = $testSiteDeployment | Invoke-BurpSuiteDeployment
+                    $deployment = $testSiteDeployment | New-BurpSuiteResource
 
                     # assert
                     Should -Invoke -CommandName New-BurpSuiteFolder -Times 0 -Scope It
@@ -940,7 +940,7 @@ InModuleScope $env:BHProjectName {
                     Mock -CommandName Update-BurpSuiteSiteScope
 
                     # act
-                    $deployment = $testSiteDeployment | Invoke-BurpSuiteDeployment
+                    $deployment = $testSiteDeployment | New-BurpSuiteResource
 
                     # assert
                     Should -Invoke -CommandName New-BurpSuiteFolder -Times 0 -Scope It
@@ -1005,7 +1005,7 @@ InModuleScope $env:BHProjectName {
                     Mock -CommandName Update-BurpSuiteSiteScanConfiguration
 
                     # act
-                    $deployment = $testSiteDeployment | Invoke-BurpSuiteDeployment
+                    $deployment = $testSiteDeployment | New-BurpSuiteResource
 
                     # assert
                     Should -Invoke -CommandName New-BurpSuiteFolder -Times 0 -Scope It
@@ -1076,7 +1076,7 @@ InModuleScope $env:BHProjectName {
                 }
 
                 # act
-                $deployment = $testScanConfigurationDeployment | Invoke-BurpSuiteDeployment
+                $deployment = $testScanConfigurationDeployment | New-BurpSuiteResource
 
                 # assert
                 Should -Invoke -CommandName _createTempFile -ParameterFilter {
@@ -1123,7 +1123,7 @@ InModuleScope $env:BHProjectName {
                 }
 
                 # act
-                $deployment = $testScanConfigurationDeployment | Invoke-BurpSuiteDeployment
+                $deployment = $testScanConfigurationDeployment | New-BurpSuiteResource
 
                 # assert
                 Should -Invoke -CommandName New-BurpSuiteScanConfiguration -Times 0 -Scope It
@@ -1206,7 +1206,7 @@ InModuleScope $env:BHProjectName {
                 }
 
                 # act
-                $deployment = $testScheduleDeployment | Invoke-BurpSuiteDeployment
+                $deployment = $testScheduleDeployment | New-BurpSuiteResource
 
                 Should -Invoke -CommandName New-BurpSuiteScheduleItem -ParameterFilter {
                     $SiteId -eq $testScheduleDeployment.Properties.siteId `
@@ -1256,7 +1256,7 @@ InModuleScope $env:BHProjectName {
                 Mock -CommandName New-BurpSuiteScheduleItem
 
                 # act
-                $deployment = $testScheduleDeployment | Invoke-BurpSuiteDeployment
+                $deployment = $testScheduleDeployment | New-BurpSuiteResource
 
                 Should -Invoke -CommandName New-BurpSuiteScheduleItem -Times 0 -Scope It
 

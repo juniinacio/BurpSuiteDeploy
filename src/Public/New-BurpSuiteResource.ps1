@@ -1,11 +1,11 @@
-function Invoke-BurpSuiteDeployment {
+function New-BurpSuiteResource {
     [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingConvertToSecureStringWithPlainText", "")]
     [CmdletBinding(SupportsShouldProcess = $true,
         HelpUri = 'https://github.com/juniinacio/BurpSuiteDeploy',
         ConfirmImpact = 'Medium')]
     Param (
         [parameter(ValueFromPipeline = $True, Mandatory = $True)]
-        [psobject]$Deployment
+        [psobject]$InputObject
     )
 
     begin {
@@ -16,18 +16,18 @@ function Invoke-BurpSuiteDeployment {
 
     process {
         try {
-            Write-Verbose "Deploying resource $($deployment.ResourceId)`..."
+            Write-Verbose "Deploying resource $($InputObject.ResourceId)`..."
 
-            if ($PSCmdlet.ShouldProcess("Deploy", $deployment.ResourceId)) {
-                switch ($deployment.ResourceType) {
+            if ($PSCmdlet.ShouldProcess("Deploy", $InputObject.ResourceId)) {
+                switch ($InputObject.ResourceType) {
                     'BurpSuite/Sites' {
-                        $resource = [SiteTreeCache]::Get(0, $deployment.Name, 'Sites')
+                        $resource = [SiteTreeCache]::Get(0, $InputObject.Name, 'Sites')
                         if ($null -eq $resource) {
 
-                            Write-Verbose "Creating site $($deployment.Name)`..."
+                            Write-Verbose "Creating site $($InputObject.Name)`..."
 
                             $scanConfigurationIds = @()
-                            foreach ($scanConfigurationId in $deployment.Properties.scanConfigurationIds) {
+                            foreach ($scanConfigurationId in $InputObject.Properties.scanConfigurationIds) {
                                 if ((_testIsExpression -InputString $scanConfigurationId)) {
                                     $resolvedScanConfigurationId = _resolveExpression -inputString $scanConfigurationId -variables @{} -resources ([DeploymentCache]::Deployments)
                                     if ($null -eq $resolvedScanConfigurationId) {
@@ -41,19 +41,19 @@ function Invoke-BurpSuiteDeployment {
 
                             $parameters = @{
                                 ParentId             = "0"
-                                Name                 = $deployment.Name
-                                Scope                = $deployment.Properties.scope
+                                Name                 = $InputObject.Name
+                                Scope                = $InputObject.Properties.scope
                                 ScanConfigurationIds = $scanConfigurationIds
                             }
 
-                            if ($null -ne ($deployment.Properties.emailRecipients)) {
-                                $parameters.EmailRecipients = $deployment.Properties.emailRecipients
+                            if ($null -ne ($InputObject.Properties.emailRecipients)) {
+                                $parameters.EmailRecipients = $InputObject.Properties.emailRecipients
                             }
 
-                            if ($null -ne ($deployment.Properties.applicationLogins)) {
+                            if ($null -ne ($InputObject.Properties.applicationLogins)) {
                                 $applicationLogins = @()
 
-                                foreach ($applicationLogin in $deployment.Properties.applicationLogins) {
+                                foreach ($applicationLogin in $InputObject.Properties.applicationLogins) {
                                     $applicationLogins += [PSCustomObject]@{ Label = $applicationLogin.Label; Credential = (New-Object System.Management.Automation.PSCredential ($applicationLogin.Username, $(ConvertTo-SecureString $applicationLogin.Password -AsPlainText -Force))) }
                                 }
 
@@ -65,18 +65,18 @@ function Invoke-BurpSuiteDeployment {
                             [SiteTreeCache]::SiteTree = Get-BurpSuiteSiteTree
                         } else {
 
-                            Write-Verbose "Updating site $($deployment.Name)`..."
+                            Write-Verbose "Updating site $($InputObject.Name)`..."
 
-                            if ($null -ne ($deployment.Properties.scope)) {
+                            if ($null -ne ($InputObject.Properties.scope)) {
                                 Write-Verbose " Updating site scopes..."
-                                Update-BurpSuiteSiteScope -SiteId $resource.Id -IncludedUrls $deployment.Properties.scope.includedUrls -ExcludedUrls $deployment.Properties.scope.excludedUrls
+                                Update-BurpSuiteSiteScope -SiteId $resource.Id -IncludedUrls $InputObject.Properties.scope.includedUrls -ExcludedUrls $InputObject.Properties.scope.excludedUrls
                                 Start-Sleep -Seconds 1
                             }
 
-                            if ($null -ne ($deployment.Properties.scanConfigurationIds)) {
+                            if ($null -ne ($InputObject.Properties.scanConfigurationIds)) {
                                 Write-Verbose " Updating scan configuration..."
                                 $scanConfigurationIds = @()
-                                foreach ($scanConfigurationId in $deployment.Properties.scanConfigurationIds) {
+                                foreach ($scanConfigurationId in $InputObject.Properties.scanConfigurationIds) {
                                     if ((_testIsExpression -InputString $scanConfigurationId)) {
                                         $resolvedScanConfigurationId = _resolveExpression -inputString $scanConfigurationId -variables @{} -resources ([DeploymentCache]::Deployments)
                                         if ($null -eq $resolvedScanConfigurationId) {
@@ -92,11 +92,11 @@ function Invoke-BurpSuiteDeployment {
                             }
 
                             [SiteTreeCache]::SiteTree = Get-BurpSuiteSiteTree
-                            $resource = [SiteTreeCache]::Get(0, $deployment.Name, 'Sites')
+                            $resource = [SiteTreeCache]::Get(0, $InputObject.Name, 'Sites')
 
-                            if ($null -ne ($deployment.Properties.applicationLogins)) {
+                            if ($null -ne ($InputObject.Properties.applicationLogins)) {
                                 Write-Verbose " Updating application logins..."
-                                foreach ($applicationLogin in $deployment.Properties.applicationLogins) {
+                                foreach ($applicationLogin in $InputObject.Properties.applicationLogins) {
                                     $appPass = ConvertTo-SecureString -String $applicationLogin.password -AsPlainText -Force
                                     $appCredential = New-Object -TypeName PSCredential -ArgumentList $applicationLogin.username, $appPass
                                     $appLogin = $resource.application_logins | Where-Object { $_.label -eq $applicationLogin.label }
@@ -109,9 +109,9 @@ function Invoke-BurpSuiteDeployment {
                                 }
                             }
 
-                            if ($null -ne ($deployment.Properties.emailRecipients)) {
+                            if ($null -ne ($InputObject.Properties.emailRecipients)) {
                                 Write-Verbose " Updating email recipients..."
-                                foreach ($emailRecipient in $deployment.Properties.emailRecipients) {
+                                foreach ($emailRecipient in $InputObject.Properties.emailRecipients) {
                                     $emailRec = $resource.email_recipients | Where-Object { $_.email -eq $emailRecipient.email }
                                     if ($null -eq $emailRec) {
                                         New-BurpSuiteSiteEmailRecipient -SiteId $resource.id -EmailRecipient $emailRecipient.email | Out-Null
@@ -125,26 +125,26 @@ function Invoke-BurpSuiteDeployment {
                     }
 
                     'BurpSuite/Folders' {
-                        $resource = [SiteTreeCache]::Get(0, $deployment.Name, 'Folders')
+                        $resource = [SiteTreeCache]::Get(0, $InputObject.Name, 'Folders')
                         if ($null -eq $resource) {
-                            Write-Verbose "Creating folder $($deployment.Name)`..."
-                            $resource = New-BurpSuiteFolder -ParentId 0 -Name $deployment.Name
+                            Write-Verbose "Creating folder $($InputObject.Name)`..."
+                            $resource = New-BurpSuiteFolder -ParentId 0 -Name $InputObject.Name
                             [SiteTreeCache]::SiteTree = Get-BurpSuiteSiteTree
                             Start-Sleep -Seconds 1
                         }
                     }
 
                     'BurpSuite/Folders/Sites' {
-                        $parentResourceId = ($deployment.ResourceId -split '/' | Select-Object -First 3) -join '/'
+                        $parentResourceId = ($InputObject.ResourceId -split '/' | Select-Object -First 3) -join '/'
                         $parentResource = [DeploymentCache]::Get($parentResourceId)
 
                         if ($null -ne $parentResource) {
-                            $resource = [SiteTreeCache]::Get($parentResource.Id, $deployment.Name, 'Sites')
+                            $resource = [SiteTreeCache]::Get($parentResource.Id, $InputObject.Name, 'Sites')
                             if ($null -eq $resource) {
-                                Write-Verbose "Creating site $($deployment.Name), parent id $($parentResource.Id)`..."
+                                Write-Verbose "Creating site $($InputObject.Name), parent id $($parentResource.Id)`..."
 
                                 $scanConfigurationIds = @()
-                                foreach ($scanConfigurationId in $deployment.Properties.scanConfigurationIds) {
+                                foreach ($scanConfigurationId in $InputObject.Properties.scanConfigurationIds) {
                                     if ((_testIsExpression -InputString $scanConfigurationId)) {
                                         $resolvedScanConfigurationId = _resolveExpression -inputString $scanConfigurationId -variables @{} -resources ([DeploymentCache]::Deployments)
                                         if ($null -eq $resolvedScanConfigurationId) {
@@ -158,19 +158,19 @@ function Invoke-BurpSuiteDeployment {
 
                                 $parameters = @{
                                     ParentId             = $parentResource.Id
-                                    Name                 = $deployment.Name
-                                    Scope                = $deployment.Properties.scope
+                                    Name                 = $InputObject.Name
+                                    Scope                = $InputObject.Properties.scope
                                     ScanConfigurationIds = $scanConfigurationIds
                                 }
 
-                                if ($null -ne ($deployment.Properties.emailRecipients)) {
-                                    $parameters.EmailRecipients = $deployment.Properties.emailRecipients
+                                if ($null -ne ($InputObject.Properties.emailRecipients)) {
+                                    $parameters.EmailRecipients = $InputObject.Properties.emailRecipients
                                 }
 
-                                if ($null -ne ($deployment.Properties.applicationLogins)) {
+                                if ($null -ne ($InputObject.Properties.applicationLogins)) {
                                     $applicationLogins = @()
 
-                                    foreach ($applicationLogin in $deployment.Properties.applicationLogins) {
+                                    foreach ($applicationLogin in $InputObject.Properties.applicationLogins) {
                                         $applicationLogins += [PSCustomObject]@{ Label = $applicationLogin.Label; Credential = (New-Object System.Management.Automation.PSCredential ($applicationLogin.Username, $(ConvertTo-SecureString $applicationLogin.Password -AsPlainText -Force))) }
                                     }
 
@@ -181,18 +181,18 @@ function Invoke-BurpSuiteDeployment {
 
                                 [SiteTreeCache]::SiteTree = Get-BurpSuiteSiteTree
                             } else {
-                                Write-Verbose "Updating site $($deployment.Name), parent id $($parentResource.Id)`..."
+                                Write-Verbose "Updating site $($InputObject.Name), parent id $($parentResource.Id)`..."
 
-                                if ($null -ne ($deployment.Properties.scope)) {
+                                if ($null -ne ($InputObject.Properties.scope)) {
                                     Write-Verbose " Updating site scopes..."
-                                    Update-BurpSuiteSiteScope -SiteId $resource.Id -IncludedUrls $deployment.Properties.scope.includedUrls -ExcludedUrls $deployment.Properties.scope.excludedUrls
+                                    Update-BurpSuiteSiteScope -SiteId $resource.Id -IncludedUrls $InputObject.Properties.scope.includedUrls -ExcludedUrls $InputObject.Properties.scope.excludedUrls
                                     Start-Sleep -Seconds 1
                                 }
 
-                                if ($null -ne ($deployment.Properties.scanConfigurationIds)) {
+                                if ($null -ne ($InputObject.Properties.scanConfigurationIds)) {
                                     Write-Verbose " Updating scan configurations..."
                                     $scanConfigurationIds = @()
-                                    foreach ($scanConfigurationId in $deployment.Properties.scanConfigurationIds) {
+                                    foreach ($scanConfigurationId in $InputObject.Properties.scanConfigurationIds) {
                                         if ((_testIsExpression -InputString $scanConfigurationId)) {
                                             $resolvedScanConfigurationId = _resolveExpression -inputString $scanConfigurationId -variables @{} -resources ([DeploymentCache]::Deployments)
                                             if ($null -eq $resolvedScanConfigurationId) {
@@ -208,11 +208,11 @@ function Invoke-BurpSuiteDeployment {
                                 }
 
                                 [SiteTreeCache]::SiteTree = Get-BurpSuiteSiteTree
-                                $resource = [SiteTreeCache]::Get($parentResource.Id, $deployment.Name, 'Sites')
+                                $resource = [SiteTreeCache]::Get($parentResource.Id, $InputObject.Name, 'Sites')
 
-                                if ($null -ne ($deployment.Properties.applicationLogins)) {
+                                if ($null -ne ($InputObject.Properties.applicationLogins)) {
                                     Write-Verbose " Updating application logins..."
-                                    foreach ($applicationLogin in $deployment.Properties.applicationLogins) {
+                                    foreach ($applicationLogin in $InputObject.Properties.applicationLogins) {
                                         $appPass = ConvertTo-SecureString -String $applicationLogin.password -AsPlainText -Force
                                         $appCredential = New-Object -TypeName PSCredential -ArgumentList $applicationLogin.username, $appPass
                                         $appLogin = $resource.application_logins | Where-Object { $_.label -eq $applicationLogin.label }
@@ -225,9 +225,9 @@ function Invoke-BurpSuiteDeployment {
                                     }
                                 }
 
-                                if ($null -ne ($deployment.Properties.emailRecipients)) {
+                                if ($null -ne ($InputObject.Properties.emailRecipients)) {
                                     Write-Verbose " Updating email recipients..."
-                                    foreach ($emailRecipient in $deployment.Properties.emailRecipients) {
+                                    foreach ($emailRecipient in $InputObject.Properties.emailRecipients) {
                                         $emailRec = $resource.email_recipients | Where-Object { $_.email -eq $emailRecipient.email }
                                         if ($null -eq $emailRec) {
                                             New-BurpSuiteSiteEmailRecipient -SiteId $resource.id -EmailRecipient $emailRecipient.email | Out-Null
@@ -239,27 +239,27 @@ function Invoke-BurpSuiteDeployment {
                                 }
                             }
                         } else {
-                            throw "Resource $($deployment.ResourceId) parent could not be determined."
+                            throw "Resource $($InputObject.ResourceId) parent could not be determined."
                         }
                     }
 
                     'BurpSuite/ScanConfigurations' {
-                        $tempFile = _createTempFile -InputObject $deployment.Properties.scanConfigurationFragmentJson
+                        $tempFile = _createTempFile -InputObject $InputObject.Properties.scanConfigurationFragmentJson
 
-                        $resource = [ScanConfigurationCache]::Get($deployment.Name)
+                        $resource = [ScanConfigurationCache]::Get($InputObject.Name)
                         if ($null -eq $resource) {
-                            Write-Verbose "Creating scan configuration $($deployment.Name)`..."
-                            $resource = New-BurpSuiteScanConfiguration -Name $deployment.Name -FilePath $tempFile.FullName
+                            Write-Verbose "Creating scan configuration $($InputObject.Name)`..."
+                            $resource = New-BurpSuiteScanConfiguration -Name $InputObject.Name -FilePath $tempFile.FullName
                             [ScanConfigurationCache]::ScanConfigurations = @(Get-BurpSuiteScanConfiguration)
                         } else {
-                            Write-Verbose "Updating scan configuration $($deployment.Name)`..."
+                            Write-Verbose "Updating scan configuration $($InputObject.Name)`..."
                             Update-BurpSuiteScanConfiguration -Id $resource.Id -FilePath $tempFile.FullName
                         }
                         Start-Sleep -Seconds 1
                     }
 
                     'BurpSuite/ScheduleItems' {
-                        $siteId = $deployment.Properties.siteId
+                        $siteId = $InputObject.Properties.siteId
                         if ((_testIsExpression -InputString $siteId)) {
                             $resolvedSiteId = _resolveExpression -inputString $siteId -variables @{} -resources ([DeploymentCache]::Deployments)
                             if ($null -eq $resolvedSiteId) {
@@ -273,7 +273,7 @@ function Invoke-BurpSuiteDeployment {
                             throw "Could not find site with resource id $siteId`."
                         }
 
-                        $scanConfigurationIds = _tryGetProperty -InputObject $deployment.Properties -PropertyName 'scanConfigurationIds'
+                        $scanConfigurationIds = _tryGetProperty -InputObject $InputObject.Properties -PropertyName 'scanConfigurationIds'
                         if ($null -eq $scanConfigurationIds) {
                             $scanConfigurationIds = $site.scan_configurations.id
                         }
@@ -291,7 +291,7 @@ function Invoke-BurpSuiteDeployment {
                             }
                         }
 
-                        $recurrenceRule = _tryGetProperty -InputObject $deployment.Properties.schedule -PropertyName 'rRule'
+                        $recurrenceRule = _tryGetProperty -InputObject $InputObject.Properties.schedule -PropertyName 'rRule'
                         if (-not ([string]::IsNullOrEmpty($recurrenceRule))) {
                             $resource = [ScheduleItemCache]::Get($siteId) | Where-Object { $_.schedule.rrule -eq $recurrenceRule } | Select-Object -First 1
                         } else {
@@ -299,16 +299,16 @@ function Invoke-BurpSuiteDeployment {
                         }
 
                         if ($null -eq $resource) {
-                            Write-Verbose "Creating schedule item $($deployment.Name), site $siteId`..."
+                            Write-Verbose "Creating schedule item $($InputObject.Name), site $siteId`..."
 
                             $parameters = @{}
 
-                            $recurrenceRule = _tryGetProperty -InputObject $deployment.Properties.schedule -PropertyName 'rRule'
+                            $recurrenceRule = _tryGetProperty -InputObject $InputObject.Properties.schedule -PropertyName 'rRule'
                             if (-not ([string]::IsNullOrEmpty($recurrenceRule))) {
                                 $parameters.rrule = $recurrenceRule
                             }
 
-                            $initialRunTime = _tryGetProperty -InputObject $deployment.Properties.schedule -PropertyName 'initialRunTime'
+                            $initialRunTime = _tryGetProperty -InputObject $InputObject.Properties.schedule -PropertyName 'initialRunTime'
                             if (-not ([string]::IsNullOrEmpty($initialRunTime))) {
                                 $dateTimeNow = Get-Date
                                 $initialRunTimeDate = [DateTime]::SpecifyKind($initialRunTime, [DateTimeKind]::Utc)
@@ -337,7 +337,7 @@ function Invoke-BurpSuiteDeployment {
 
                 $provisioningResult = [PSCustomObject]@{
                     Id                = $resource.Id
-                    ResourceId        = $deployment.ResourceId
+                    ResourceId        = $InputObject.ResourceId
                     ProvisioningState = [ProvisioningState]::Succeeded
                     Properties        = $resource
                 }
@@ -345,7 +345,7 @@ function Invoke-BurpSuiteDeployment {
         } catch {
             $provisioningResult = [PSCustomObject]@{
                 Id                = $resource.Id
-                ResourceId        = $deployment.ResourceId
+                ResourceId        = $InputObject.ResourceId
                 ProvisioningState = [ProvisioningState]::Error
                 ProvisioningError = $_.Exception.Message.ToString()
                 Properties        = $resource
