@@ -17,7 +17,7 @@ function Get-BurpSuiteResource {
                 $template = ConvertFrom-Json -InputObject (Get-Content -Path $path -Raw | Out-String)
 
                 foreach($resource in $template.resources) {
-                    [PSCustomObject]@{
+                    [Resource]@{
                         ResourceId = [Util]::GetResourceId($resource.name, $resource.type)
                         ResourceType = [Util]::GetResourceType($resource.type)
                         Name = $resource.name
@@ -27,7 +27,7 @@ function Get-BurpSuiteResource {
 
                     if ($null -ne (_tryGetProperty -InputObject $resource -PropertyName 'resources')) {
                         foreach($childResource in $resource.resources) {
-                            [PSCustomObject]@{
+                            [Resource]@{
                                 ResourceId = [Util]::GetResourceId($childResource.name, $childResource.type, $resource.type)
                                 ResourceType = [Util]::GetResourceType($childResource.type, $resource.type)
                                 Name = [Util]::GetResourceName($childResource.name)

@@ -5,7 +5,7 @@ function New-BurpSuiteResource {
         ConfirmImpact = 'Medium')]
     Param (
         [parameter(ValueFromPipeline = $True, Mandatory = $True)]
-        [psobject]$InputObject
+        [object]$InputObject
     )
 
     begin {

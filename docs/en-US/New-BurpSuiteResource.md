@@ -13,7 +13,7 @@ Invokes one or more deployments.
 ## SYNTAX
 
 ```
-New-BurpSuiteResource [-InputObject] <PSObject> [-WhatIf] [-Confirm] [<CommonParameters>]
+New-BurpSuiteResource [-InputObject] <Object> [-WhatIf] [-Confirm] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -49,7 +49,7 @@ Accept wildcard characters: False
 Specifies a template resource to create.
 
 ```yaml
-Type: PSObject
+Type: Object
 Parameter Sets: (All)
 Aliases:
 
