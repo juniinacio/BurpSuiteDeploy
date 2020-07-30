@@ -5,33 +5,33 @@ online version: https://github.com/juniinacio/BurpSuiteDeploy
 schema: 2.0.0
 ---
 
-# Get-BurpSuiteDeployment
+# Get-BurpSuiteResource
 
 ## SYNOPSIS
-Reads all deployments from a JSON template file.
+Gets all resources defined in the JSON template file.
 
 ## SYNTAX
 
 ```
-Get-BurpSuiteDeployment [-TemplateFile] <String[]> [<CommonParameters>]
+Get-BurpSuiteResource [-TemplateFile] <String[]> [<CommonParameters>]
 ```
 
 ## DESCRIPTION
-Reads all deployments from a JSON template file.
+Gets all resources defined in the JSON template file.
 
 ## EXAMPLES
 
 ### Example 1
 ```powershell
-PS C:\> Get-BurpSuiteDeployment -TemplateFile C:\templates\BurpSuite.json
+PS C:\> Get-BurpSuiteResource -TemplateFile C:\templates\BurpSuite.json
 ```
 
-This example show how to get all deployment objects out of a file.
+This example shows how to get all template resources out of a file.
 
 ## PARAMETERS
 
 ### -TemplateFile
-Specify the path to your BurpSuite JSON file.
+Specify the path to your BurpSuite JSON template file.
 
 ```yaml
 Type: String[]

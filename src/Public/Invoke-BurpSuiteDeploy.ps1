@@ -26,15 +26,15 @@ function Invoke-BurpSuiteDeploy {
         try {
             if ($PSCmdlet.ShouldProcess("Deploy", $TemplateFile)) {
 
-                $deployments = Get-BurpSuiteDeployment -TemplateFile $TemplateFile
+                $resources = Get-BurpSuiteResource -TemplateFile $TemplateFile
 
-                $provisioningResults = $deployments | Invoke-BurpSuiteDeployment -Confirm:$false
+                $deployments = $resources | New-BurpSuiteResource -Confirm:$false
 
-                if (@($provisioningResults).ProvisioningState -contains [ProvisioningState]::Error) {
+                if (@($deployments).ProvisioningState -contains [ProvisioningState]::Error) {
                     Write-Error -Message "Provisioning of one or more resources completed with errors."
                 }
 
-                $provisioningResults
+                $deployments
             }
         } catch {
             throw

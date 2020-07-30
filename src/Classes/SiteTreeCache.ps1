@@ -14,4 +14,12 @@ class SiteTreeCache {
         }
         return @([SiteTreeCache]::SiteTree.Sites | Where-Object { $_.id -eq $id })[0]
     }
+
+    static [void] Reload() {
+        [SiteTreeCache]::Init()
+    }
+
+    static [void] Init() {
+        [SiteTreeCache]::SiteTree = Get-BurpSuiteSiteTree
+    }
 }

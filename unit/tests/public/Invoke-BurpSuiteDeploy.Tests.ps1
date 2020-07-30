@@ -5,8 +5,8 @@ InModuleScope $env:BHProjectName {
                 function Connect-BurpSuite ($Uri, $APIKey) { }
                 function Disconnect-BurpSuite { }
 
-                Mock -CommandName Get-BurpSuiteDeployment -MockWith {}
-                Mock -CommandName Invoke-BurpSuiteDeployment -MockWith {
+                Mock -CommandName Get-BurpSuiteResource -MockWith {}
+                Mock -CommandName New-BurpSuiteResource -MockWith {
                     [PSCustomObject]@{
                         Id                = 1
                         ResourceId        = 'BurpSuite/ScanConfigurations/Example - Large Scan Configuration'
@@ -35,7 +35,7 @@ InModuleScope $env:BHProjectName {
             It "should call Disconnect-BurpSuite" {
                 # arrange
                 Mock -CommandName Disconnect-BurpSuite -Verifiable
-                Mock -CommandName Invoke-BurpSuiteDeployment -MockWith {
+                Mock -CommandName New-BurpSuiteResource -MockWith {
                     $deploymentResult = [PSCustomObject]@{
                         Id                = 1
                         ResourceId        = 'BurpSuite/ScanConfigurations/Example - Large Scan Configuration'
@@ -56,9 +56,9 @@ InModuleScope $env:BHProjectName {
                 function Connect-BurpSuite ($Uri, $APIKey) { }
                 function Disconnect-BurpSuite { }
 
-                Mock -CommandName Get-BurpSuiteDeployment -MockWith {}
+                Mock -CommandName Get-BurpSuiteResource -MockWith {}
 
-                Mock -CommandName Invoke-BurpSuiteDeployment -MockWith {
+                Mock -CommandName New-BurpSuiteResource -MockWith {
                     $deploymentResult = [PSCustomObject]@{
                         Id                = 1
                         ResourceId        = 'BurpSuite/ScanConfigurations/Example - Large Scan Configuration'
@@ -71,15 +71,15 @@ InModuleScope $env:BHProjectName {
                 $testKey = "ItDoesNotMatter"
             }
 
-            It "should call Get-BurpSuiteDeployment" {
+            It "should call Get-BurpSuiteResource" {
                 # arrange
-                Mock -CommandName Get-BurpSuiteDeployment
+                Mock -CommandName Get-BurpSuiteResource
 
                 # act
                 Invoke-BurpSuiteDeploy -TemplateFile $testTemplateFile -Uri $testUri  -APIkey $testKey
 
                 # assert
-                Should -Invoke -CommandName Get-BurpSuiteDeployment -ParameterFilter {
+                Should -Invoke -CommandName Get-BurpSuiteResource -ParameterFilter {
                     $TemplateFile -eq $testTemplateFile
                 }
             }
@@ -90,16 +90,16 @@ InModuleScope $env:BHProjectName {
                 function Connect-BurpSuite ($Uri, $APIKey) { }
                 function Disconnect-BurpSuite { }
 
-                Mock -CommandName Get-BurpSuiteDeployment -MockWith {}
+                Mock -CommandName Get-BurpSuiteResource -MockWith {}
 
                 $testTemplateFile = Join-Path -Path $PSScriptRoot -ChildPath '..\artifacts\AllResourceTypes.json'
                 $testUri = "https://burpsuite.example.com"
                 $testKey = "ItDoesNotMatter"
             }
 
-            It "should call Invoke-BurpSuiteDeployment" {
+            It "should call New-BurpSuiteResource" {
                 # arrange
-                Mock -CommandName Get-BurpSuiteDeployment -MockWith {
+                Mock -CommandName Get-BurpSuiteResource -MockWith {
                     $objects = @()
 
                     $objects += [PSCustomObject]@{
@@ -125,7 +125,7 @@ InModuleScope $env:BHProjectName {
 
                     $objects
                 }
-                Mock -CommandName Invoke-BurpSuiteDeployment -MockWith {
+                Mock -CommandName New-BurpSuiteResource -MockWith {
                     [PSCustomObject]@{
                         ResourceId        = $Deployment.ResourceId
                         Properties        = @{
@@ -139,25 +139,25 @@ InModuleScope $env:BHProjectName {
                 Invoke-BurpSuiteDeploy -TemplateFile $testTemplateFile -Uri $testUri  -APIkey $testKey
 
                 # assert
-                Should -Invoke Invoke-BurpSuiteDeployment -ParameterFilter {
-                    $Deployment.ResourceId -eq 'BurpSuite/Folders/Example.com' `
-                        -and $Deployment.Properties.ParentId -eq 0
+                Should -Invoke New-BurpSuiteResource -ParameterFilter {
+                    $InputObject.ResourceId -eq 'BurpSuite/Folders/Example.com' `
+                        -and $InputObject.Properties.ParentId -eq 0
                 }
 
-                Should -Invoke Invoke-BurpSuiteDeployment -ParameterFilter {
-                    $Deployment.ResourceId -eq 'BurpSuite/Sites/root.example.com' `
-                        -and $Deployment.Properties.ParentId -eq 0
+                Should -Invoke New-BurpSuiteResource -ParameterFilter {
+                    $InputObject.ResourceId -eq 'BurpSuite/Sites/root.example.com' `
+                        -and $InputObject.Properties.ParentId -eq 0
                 }
 
-                Should -Invoke Invoke-BurpSuiteDeployment -ParameterFilter {
-                    $Deployment.ResourceId -eq 'BurpSuite/ScanConfigurations/Example - Large Scan Configuration' `
-                        -and $Deployment.Properties.ParentId -eq 0
+                Should -Invoke New-BurpSuiteResource -ParameterFilter {
+                    $InputObject.ResourceId -eq 'BurpSuite/ScanConfigurations/Example - Large Scan Configuration' `
+                        -and $InputObject.Properties.ParentId -eq 0
                 }
             }
 
             It "should return deployment objects" {
                 # arrange
-                Mock -CommandName Get-BurpSuiteDeployment -MockWith {
+                Mock -CommandName Get-BurpSuiteResource -MockWith {
                     $objects = @()
 
                     $objects += [PSCustomObject]@{
@@ -170,7 +170,7 @@ InModuleScope $env:BHProjectName {
                     $objects
                 }
 
-                Mock -CommandName Invoke-BurpSuiteDeployment -MockWith {
+                Mock -CommandName New-BurpSuiteResource -MockWith {
                     $objects = @()
 
                     $objects += [PSCustomObject]@{
@@ -193,7 +193,7 @@ InModuleScope $env:BHProjectName {
 
             It "should throw exception when deployments failes" {
                 # arrange
-                Mock -CommandName Get-BurpSuiteDeployment -MockWith {
+                Mock -CommandName Get-BurpSuiteResource -MockWith {
                     $objects = @()
 
                     $objects += [PSCustomObject]@{
@@ -206,7 +206,7 @@ InModuleScope $env:BHProjectName {
                     $objects
                 }
 
-                Mock -CommandName Invoke-BurpSuiteDeployment -MockWith {
+                Mock -CommandName New-BurpSuiteResource -MockWith {
                     $objects = @()
 
                     $objects += [PSCustomObject]@{
