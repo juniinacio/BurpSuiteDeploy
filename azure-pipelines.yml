@@ -1,3 +1,9 @@
+parameters:
+  - name: publishToGallery
+    displayName: Set to true to publish the module to PSGallery
+    type: boolean
+    default: true
+
 name: $(Build.BuildID)
 
 trigger:
@@ -46,10 +52,10 @@ stages:
       parameters:
         os: 'Linux (PowerShell Core)'
 
-  # - job: Windows_Phase
-  #   displayName: Build Windows (PowerShell.exe)
-  #   pool:
-  #     vmImage: windows-latest
+  - job: Windows_Phase
+    displayName: Build Windows (PowerShell.exe)
+    pool:
+      vmImage: windows-latest
 
     steps:
     - template: .azure-pipelines/unitTests.yml
@@ -61,7 +67,7 @@ stages:
     displayName: Build Windows (Pwsh.exe)
     dependsOn:
       - macOS_Linux_Phase
-      # - Windows_Phase
+      - Windows_Phase
     condition: |
       and
       (
@@ -308,7 +314,8 @@ stages:
     and
     (
       succeeded(),
-      eq(variables['Build.SourceBranchName'], 'master')
+      eq(variables['Build.SourceBranchName'], 'master'),
+      eq(${{ parameters.publishToGallery }}, true)
     )
   jobs:
   - deployment: Release
