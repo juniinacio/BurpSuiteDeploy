@@ -9,8 +9,8 @@ class DeploymentCache {
         return [DeploymentCache]::Deployments
     }
 
-    static [object] Set([object]$object) {
-        return @([DeploymentCache]::Deployments | Where-Object {$_.ResourceId -eq $resourceId})[0]
+    static [void] Set([object]$deployment) {
+        [DeploymentCache]::Deployments += $deployment
     }
 
     static [void] Init() {
