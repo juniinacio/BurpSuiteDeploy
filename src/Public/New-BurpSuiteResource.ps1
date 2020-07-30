@@ -355,6 +355,7 @@ function New-BurpSuiteResource {
         }
 
         [DeploymentCache]::Set($deployment)
+
         $deployment
     }
 
