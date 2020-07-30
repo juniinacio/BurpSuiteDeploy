@@ -5,7 +5,7 @@ online version: https://github.com/juniinacio/BurpSuiteDeploy
 schema: 2.0.0
 ---
 
-# New-BurpSuiteResource
+# Invoke-BurpSuiteResource
 
 ## SYNOPSIS
 Invokes one or more deployments.
@@ -13,7 +13,7 @@ Invokes one or more deployments.
 ## SYNTAX
 
 ```
-New-BurpSuiteResource [-InputObject] <Object> [-WhatIf] [-Confirm] [<CommonParameters>]
+Invoke-BurpSuiteResource [-InputObject] <Object> [-WhatIf] [-Confirm] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -23,7 +23,7 @@ Creates one or more resources.
 
 ### Example 1
 ```powershell
-PS C:\> (Get-BurpSuiteResource -TemplateFile C:\templates\BurpSuite.json) | New-BurpSuiteResource
+PS C:\> (Get-BurpSuiteResource -TemplateFile C:\templates\BurpSuite.json) | Invoke-BurpSuiteResource
 ```
 
 This example shows how to create one or more resources.

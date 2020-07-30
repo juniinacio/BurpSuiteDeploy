@@ -20,4 +20,7 @@
     'PowerShellBuild'  = @{
         Version = '0.4.0'
     }
+    'BurpSuite'  = @{
+        Version = '1.2.1'
+    }
 }
