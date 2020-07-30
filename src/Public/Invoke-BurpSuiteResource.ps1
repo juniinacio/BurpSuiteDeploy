@@ -1,4 +1,4 @@
-function New-BurpSuiteResource {
+function Invoke-BurpSuiteResource {
     [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingConvertToSecureStringWithPlainText", "")]
     [CmdletBinding(SupportsShouldProcess = $true,
         HelpUri = 'https://github.com/juniinacio/BurpSuiteDeploy',

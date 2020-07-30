@@ -6,7 +6,7 @@ InModuleScope $env:BHProjectName {
                 function Disconnect-BurpSuite { }
 
                 Mock -CommandName Get-BurpSuiteResource -MockWith {}
-                Mock -CommandName New-BurpSuiteResource -MockWith {
+                Mock -CommandName Invoke-BurpSuiteResource -MockWith {
                     [PSCustomObject]@{
                         Id                = 1
                         ResourceId        = 'BurpSuite/ScanConfigurations/Example - Large Scan Configuration'
@@ -35,7 +35,7 @@ InModuleScope $env:BHProjectName {
             It "should call Disconnect-BurpSuite" {
                 # arrange
                 Mock -CommandName Disconnect-BurpSuite -Verifiable
-                Mock -CommandName New-BurpSuiteResource -MockWith {
+                Mock -CommandName Invoke-BurpSuiteResource -MockWith {
                     $deploymentResult = [PSCustomObject]@{
                         Id                = 1
                         ResourceId        = 'BurpSuite/ScanConfigurations/Example - Large Scan Configuration'
@@ -58,7 +58,7 @@ InModuleScope $env:BHProjectName {
 
                 Mock -CommandName Get-BurpSuiteResource -MockWith {}
 
-                Mock -CommandName New-BurpSuiteResource -MockWith {
+                Mock -CommandName Invoke-BurpSuiteResource -MockWith {
                     $deploymentResult = [PSCustomObject]@{
                         Id                = 1
                         ResourceId        = 'BurpSuite/ScanConfigurations/Example - Large Scan Configuration'
@@ -97,7 +97,7 @@ InModuleScope $env:BHProjectName {
                 $testKey = "ItDoesNotMatter"
             }
 
-            It "should call New-BurpSuiteResource" {
+            It "should call Invoke-BurpSuiteResource" {
                 # arrange
                 Mock -CommandName Get-BurpSuiteResource -MockWith {
                     $objects = @()
@@ -125,7 +125,7 @@ InModuleScope $env:BHProjectName {
 
                     $objects
                 }
-                Mock -CommandName New-BurpSuiteResource -MockWith {
+                Mock -CommandName Invoke-BurpSuiteResource -MockWith {
                     [PSCustomObject]@{
                         ResourceId        = $Deployment.ResourceId
                         Properties        = @{
@@ -139,17 +139,17 @@ InModuleScope $env:BHProjectName {
                 Invoke-BurpSuiteDeploy -TemplateFile $testTemplateFile -Uri $testUri  -APIkey $testKey
 
                 # assert
-                Should -Invoke New-BurpSuiteResource -ParameterFilter {
+                Should -Invoke Invoke-BurpSuiteResource -ParameterFilter {
                     $InputObject.ResourceId -eq 'BurpSuite/Folders/Example.com' `
                         -and $InputObject.Properties.ParentId -eq 0
                 }
 
-                Should -Invoke New-BurpSuiteResource -ParameterFilter {
+                Should -Invoke Invoke-BurpSuiteResource -ParameterFilter {
                     $InputObject.ResourceId -eq 'BurpSuite/Sites/root.example.com' `
                         -and $InputObject.Properties.ParentId -eq 0
                 }
 
-                Should -Invoke New-BurpSuiteResource -ParameterFilter {
+                Should -Invoke Invoke-BurpSuiteResource -ParameterFilter {
                     $InputObject.ResourceId -eq 'BurpSuite/ScanConfigurations/Example - Large Scan Configuration' `
                         -and $InputObject.Properties.ParentId -eq 0
                 }
@@ -170,7 +170,7 @@ InModuleScope $env:BHProjectName {
                     $objects
                 }
 
-                Mock -CommandName New-BurpSuiteResource -MockWith {
+                Mock -CommandName Invoke-BurpSuiteResource -MockWith {
                     $objects = @()
 
                     $objects += [PSCustomObject]@{
@@ -206,7 +206,7 @@ InModuleScope $env:BHProjectName {
                     $objects
                 }
 
-                Mock -CommandName New-BurpSuiteResource -MockWith {
+                Mock -CommandName Invoke-BurpSuiteResource -MockWith {
                     $objects = @()
 
                     $objects += [PSCustomObject]@{
