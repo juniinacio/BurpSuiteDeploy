@@ -61,7 +61,7 @@ stages:
     displayName: Build Windows (Pwsh.exe)
     dependsOn:
       - macOS_Linux_Phase
-      - Windows_Phase
+      # - Windows_Phase
     condition: |
       and
       (
