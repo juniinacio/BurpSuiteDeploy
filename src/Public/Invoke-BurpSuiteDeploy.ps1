@@ -26,7 +26,7 @@ function Invoke-BurpSuiteDeploy {
         try {
             if ($PSCmdlet.ShouldProcess("Deploy", $TemplateFile)) {
 
-                $deployments = Get-BurpSuiteDeployment -TemplateFile $TemplateFile
+                $deployments = Get-BurpSuiteResource -TemplateFile $TemplateFile
 
                 $provisioningResults = $deployments | New-BurpSuiteResource -Confirm:$false
 

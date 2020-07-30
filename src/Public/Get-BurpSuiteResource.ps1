@@ -1,4 +1,4 @@
-function Get-BurpSuiteDeployment {
+function Get-BurpSuiteResource {
     [CmdletBinding(HelpUri = 'https://github.com/juniinacio/BurpSuiteDeploy', ConfirmImpact = 'Low')]
     Param (
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]

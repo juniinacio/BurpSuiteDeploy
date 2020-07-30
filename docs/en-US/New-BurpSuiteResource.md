@@ -23,7 +23,7 @@ Creates one or more resources.
 
 ### Example 1
 ```powershell
-PS C:\> (Get-BurpSuiteDeployment -TemplateFile C:\templates\BurpSuite.json) | New-BurpSuiteResource
+PS C:\> (Get-BurpSuiteResource -TemplateFile C:\templates\BurpSuite.json) | New-BurpSuiteResource
 ```
 
 This example shows how to create one or more resources.

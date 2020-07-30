@@ -1,5 +1,5 @@
 InModuleScope $env:BHProjectName {
-    Describe "Get-BurpSuiteDeployment" {
+    Describe "Get-BurpSuiteResource" {
         Context "Deployment Objects" {
             BeforeAll {
                 $testArtifacts = Join-Path -Path $PSScriptRoot -ChildPath '..\artifacts'
@@ -12,7 +12,7 @@ InModuleScope $env:BHProjectName {
                 $testTemplateFile = Join-Path -Path $testArtifacts -ChildPath 'AllResourceTypes.json'
 
                 # act
-                $deployments = Get-BurpSuiteDeployment -TemplateFile $testTemplateFile
+                $deployments = Get-BurpSuiteResource -TemplateFile $testTemplateFile
 
                 # assert
                 $deployments.Count | Should -Be 4
@@ -35,7 +35,7 @@ InModuleScope $env:BHProjectName {
                 $testFolderSite = Get-Content -Path (Join-Path -Path $testArtifacts -ChildPath 'FolderSiteDeploymentType.json') | ConvertFrom-Json
 
                 # act
-                $deployments = Get-BurpSuiteDeployment -TemplateFile $testTemplateFile
+                $deployments = Get-BurpSuiteResource -TemplateFile $testTemplateFile
 
                 # assert
                 $deployments.Count | Should -Be 4
