@@ -18,8 +18,8 @@ function Get-BurpSuiteResource {
 
                 foreach($resource in $template.resources) {
                     [PSCustomObject]@{
-                        ResourceId = @($resource.type.TrimEnd("/"), $resource.name.TrimStart("/")) -join "/"
-                        ResourceType = $resource.type.TrimEnd("/")
+                        ResourceId = [Util]::GetResourceId($resource.name, $resource.type)
+                        ResourceType = [Util]::GetResourceType($resource.type)
                         Name = $resource.name
                         Properties = $resource.Properties
                         DependsOn = $resource.dependsOn
@@ -28,9 +28,9 @@ function Get-BurpSuiteResource {
                     if ($null -ne (_tryGetProperty -InputObject $resource -PropertyName 'resources')) {
                         foreach($childResource in $resource.resources) {
                             [PSCustomObject]@{
-                                ResourceId = @($resource.type.TrimEnd("/"), (($childResource.name.TrimStart("/")) -split "/")[0], $childResource.type.TrimEnd("/"), (($childResource.name.TrimStart("/")) -split "/")[-1]) -join "/"
-                                ResourceType = @($resource.type.TrimEnd("/"), $childResource.type.TrimStart("/")) -join "/"
-                                Name = (($childResource.name.TrimStart("/")) -split "/")[-1]
+                                ResourceId = [Util]::GetResourceId($childResource.name, $childResource.type, $resource.type)
+                                ResourceType = [Util]::GetResourceType($childResource.type, $resource.type)
+                                Name = [Util]::GetResourceName($childResource.name)
                                 Properties = $childResource.Properties
                                 DependsOn = $childResource.dependsOn
                             }
