@@ -9,9 +9,9 @@ function New-BurpSuiteResource {
     )
 
     begin {
-        [SiteTreeCache]::SiteTree = Get-BurpSuiteSiteTree
-        [ScanConfigurationCache]::ScanConfigurations = @(Get-BurpSuiteScanConfiguration)
-        [ScheduleItemCache]::ScheduleItems = @(Get-BurpSuiteScheduleItem -Fields id, schedule, site)
+        [SiteTreeCache]::Init()
+        [ScanConfigurationCache]::Init()
+        [ScheduleItemCache]::Init()
     }
 
     process {
@@ -62,7 +62,7 @@ function New-BurpSuiteResource {
 
                             $resource = New-BurpSuiteSite @parameters
 
-                            [SiteTreeCache]::SiteTree = Get-BurpSuiteSiteTree
+                            [SiteTreeCache]::Reload()
                         } else {
 
                             Write-Verbose "Updating site $($InputObject.Name)`..."
@@ -91,7 +91,7 @@ function New-BurpSuiteResource {
                                 Start-Sleep -Seconds 1
                             }
 
-                            [SiteTreeCache]::SiteTree = Get-BurpSuiteSiteTree
+                            [SiteTreeCache]::Reload()
                             $resource = [SiteTreeCache]::Get(0, $InputObject.Name, 'Sites')
 
                             if ($null -ne ($InputObject.Properties.applicationLogins)) {
@@ -129,7 +129,7 @@ function New-BurpSuiteResource {
                         if ($null -eq $resource) {
                             Write-Verbose "Creating folder $($InputObject.Name)`..."
                             $resource = New-BurpSuiteFolder -ParentId 0 -Name $InputObject.Name
-                            [SiteTreeCache]::SiteTree = Get-BurpSuiteSiteTree
+                            [SiteTreeCache]::Reload()
                             Start-Sleep -Seconds 1
                         }
                     }
@@ -179,7 +179,7 @@ function New-BurpSuiteResource {
 
                                 $resource = New-BurpSuiteSite @parameters
 
-                                [SiteTreeCache]::SiteTree = Get-BurpSuiteSiteTree
+                                [SiteTreeCache]::Reload()
                             } else {
                                 Write-Verbose "Updating site $($InputObject.Name), parent id $($parentResource.Id)`..."
 
@@ -207,7 +207,7 @@ function New-BurpSuiteResource {
                                     Start-Sleep -Seconds 1
                                 }
 
-                                [SiteTreeCache]::SiteTree = Get-BurpSuiteSiteTree
+                                [SiteTreeCache]::Reload()
                                 $resource = [SiteTreeCache]::Get($parentResource.Id, $InputObject.Name, 'Sites')
 
                                 if ($null -ne ($InputObject.Properties.applicationLogins)) {
@@ -250,7 +250,7 @@ function New-BurpSuiteResource {
                         if ($null -eq $resource) {
                             Write-Verbose "Creating scan configuration $($InputObject.Name)`..."
                             $resource = New-BurpSuiteScanConfiguration -Name $InputObject.Name -FilePath $tempFile.FullName
-                            [ScanConfigurationCache]::ScanConfigurations = @(Get-BurpSuiteScanConfiguration)
+                            [ScanConfigurationCache]::Reload()
                         } else {
                             Write-Verbose "Updating scan configuration $($InputObject.Name)`..."
                             Update-BurpSuiteScanConfiguration -Id $resource.Id -FilePath $tempFile.FullName
@@ -325,6 +325,8 @@ function New-BurpSuiteResource {
                             $schedule = [PSCustomObject]$parameters
 
                             $resource = New-BurpSuiteScheduleItem -SiteId $siteId -ScanConfigurationIds $resolvedScanConfigurationIds -Schedule $schedule
+
+                            [ScheduleItemCache]::Reload()
                         }
 
                         Start-Sleep -Seconds 1
@@ -335,7 +337,7 @@ function New-BurpSuiteResource {
                     }
                 }
 
-                $provisioningResult = [PSCustomObject]@{
+                $deployment = [Deployment]@{
                     Id                = $resource.Id
                     ResourceId        = $InputObject.ResourceId
                     ProvisioningState = [ProvisioningState]::Succeeded
@@ -343,7 +345,7 @@ function New-BurpSuiteResource {
                 }
             }
         } catch {
-            $provisioningResult = [PSCustomObject]@{
+            $deployment = [Deployment]@{
                 Id                = $resource.Id
                 ResourceId        = $InputObject.ResourceId
                 ProvisioningState = [ProvisioningState]::Error
@@ -352,11 +354,11 @@ function New-BurpSuiteResource {
             }
         }
 
-        [DeploymentCache]::Deployments += $provisioningResult
-        $provisioningResult
+        [DeploymentCache]::Set($deployment)
+        $deployment
     }
 
     end {
-        [DeploymentCache]::Deployments = @()
+        [DeploymentCache]::Init()
     }
 }
