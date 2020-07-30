@@ -24,7 +24,7 @@ Applies your configuration on BurpSuite.
 
 ### Example 1
 ```powershell
-PS C:\> Invoke-BurpSuiteDeploy -TemplateFile -TemplateFile C:\templates\BurpSuite.json -Uri https://burpsuite.example.com  -APIkey 'MyKey'
+PS C:\> Invoke-BurpSuiteDeploy -TemplateFile C:\templates\BurpSuite.json -Uri https://burpsuite.example.com  -APIkey 'MyKey'
 ```
 
 This example shows how to apply a configuration.
