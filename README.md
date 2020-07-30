@@ -34,7 +34,7 @@ You can review the status of every BurpSuite pipeline below.
 
 |         Pipeline                    |             Status           |
 |-------------------------------------|------------------------------|
-| Production                          | [![Build Status](https://dev.azure.com/juniinacio/BurpSuite/_apis/build/status/BurpSuite?branchName=master)](https://dev.azure.com/juniinacio/BurpSuite/_build/latest?definitionId=13&branchName=master) |
+| Production                          | [![Build Status](https://dev.azure.com/juniinacio/BurpSuite/_apis/build/status/BurpSuiteDeploy?branchName=master)](https://dev.azure.com/juniinacio/BurpSuite/_build/latest?definitionId=14&branchName=master) |
 
 The build for BurpSuiteDeploy is run on Linux and Windows to ensure there are no casing or other platform specific issues with the code. On each platform unit tests are run to ensure the code runs on all platforms and without issues. During pull request builds the module is also installed both on Windows and Linux and tested using integration tests against BurpSuite Enterprise before changes are pushed to the master branch.
 
