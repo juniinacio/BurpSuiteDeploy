@@ -117,9 +117,9 @@ InModuleScope $env:BHProjectName {
                 Mock -CommandName New-BurpSuiteSite
                 Mock -CommandName Update-BurpSuiteSiteScope
                 Mock -CommandName Update-BurpSuiteSiteScanConfiguration
-                Mock -CommandName Update-BurpSuiteSiteApplicationLogin
+                Mock -CommandName Update-BurpSuiteSiteLoginCredential
                 Mock -CommandName Update-BurpSuiteSiteEmailRecipient
-                Mock -CommandName New-BurpSuiteSiteApplicationLogin
+                Mock -CommandName New-BurpSuiteSiteLoginCredential
                 Mock -CommandName New-BurpSuiteSiteRecordedLogin
                 Mock -CommandName New-BurpSuiteSiteEmailRecipient
 
@@ -204,7 +204,7 @@ InModuleScope $env:BHProjectName {
             }
 
             Context "Application Logins" {
-                It "should call Update-BurpSuiteSiteApplicationLogin when application login does exist" {
+                It "should call Update-BurpSuiteSiteLoginCredential when application login does exist" {
                     # arrange
                     $testSiteDeployment = ConvertFrom-Json -InputObject (Get-Content -Path $testArtifacts\SiteDeploymentType.json | Out-String)
 
@@ -235,7 +235,7 @@ InModuleScope $env:BHProjectName {
                     Mock -CommandName New-BurpSuiteFolder
                     Mock -CommandName New-BurpSuiteSite
                     Mock -CommandName New-BurpSuiteSiteRecordedLogin
-                    Mock -CommandName Update-BurpSuiteSiteApplicationLogin
+                    Mock -CommandName Update-BurpSuiteSiteLoginCredential
 
                     # act
                     $deployment = $testSiteDeployment | Invoke-BurpSuiteResource
@@ -244,7 +244,7 @@ InModuleScope $env:BHProjectName {
                     Should -Invoke -CommandName New-BurpSuiteFolder -Times 0 -Scope It
                     Should -Invoke -CommandName New-BurpSuiteSite -Times 0 -Scope It
 
-                    Should -Invoke -CommandName Update-BurpSuiteSiteApplicationLogin -ParameterFilter {
+                    Should -Invoke -CommandName Update-BurpSuiteSiteLoginCredential -ParameterFilter {
                         $Id -eq $testSite.application_logins.login_credentials[0].id `
                             -and $Credential.GetNetworkCredential().UserName -eq $testSiteDeployment.Properties.applicationLogins.loginCredentials[0].username `
                             -and $Credential.GetNetworkCredential().Password -eq $testSiteDeployment.Properties.applicationLogins.loginCredentials[0].password
@@ -255,7 +255,7 @@ InModuleScope $env:BHProjectName {
                     $deployment.ProvisioningState | Should -Be $testResult.ProvisioningState
                 }
 
-                It "should call New-BurpSuiteSiteApplicationLogin when application login does exist" {
+                It "should call New-BurpSuiteSiteLoginCredential when application login does exist" {
                     # arrange
                     $testSiteDeployment = ConvertFrom-Json -InputObject (Get-Content -Path $testArtifacts\SiteDeploymentType.json | Out-String)
                     $testSiteDeployment.Properties.applicationLogins.recordedLogins = $null
@@ -286,7 +286,7 @@ InModuleScope $env:BHProjectName {
 
                     Mock -CommandName New-BurpSuiteFolder
                     Mock -CommandName New-BurpSuiteSite
-                    Mock -CommandName New-BurpSuiteSiteApplicationLogin
+                    Mock -CommandName New-BurpSuiteSiteLoginCredential
 
                     # act
                     $deployment = $testSiteDeployment | Invoke-BurpSuiteResource
@@ -295,7 +295,7 @@ InModuleScope $env:BHProjectName {
                     Should -Invoke -CommandName New-BurpSuiteFolder -Times 0 -Scope It
                     Should -Invoke -CommandName New-BurpSuiteSite -Times 0 -Scope It
 
-                    Should -Invoke -CommandName New-BurpSuiteSiteApplicationLogin -ParameterFilter {
+                    Should -Invoke -CommandName New-BurpSuiteSiteLoginCredential -ParameterFilter {
                         $SiteId -eq $testSite.id `
                             -and $Label -eq $testSiteDeployment.Properties.applicationLogins.loginCredentials[0].label `
                             -and $Credential.GetNetworkCredential().UserName -eq $testSiteDeployment.Properties.applicationLogins.loginCredentials[0].username `
@@ -686,9 +686,9 @@ InModuleScope $env:BHProjectName {
 
                 Mock -CommandName Update-BurpSuiteSiteScope
                 Mock -CommandName Update-BurpSuiteSiteScanConfiguration
-                Mock -CommandName Update-BurpSuiteSiteApplicationLogin
+                Mock -CommandName Update-BurpSuiteSiteLoginCredential
                 Mock -CommandName Update-BurpSuiteSiteEmailRecipient
-                Mock -CommandName New-BurpSuiteSiteApplicationLogin
+                Mock -CommandName New-BurpSuiteSiteLoginCredential
                 Mock -CommandName New-BurpSuiteSiteRecordedLogin
                 Mock -CommandName New-BurpSuiteSiteEmailRecipient
 
@@ -751,7 +751,7 @@ InModuleScope $env:BHProjectName {
             }
 
             Context "Application Logins" {
-                It "should call Update-BurpSuiteSiteApplicationLogin when application login does exist" {
+                It "should call Update-BurpSuiteSiteLoginCredential when application login does exist" {
                     # arrange
                     $testFolderDeployment = ConvertFrom-Json -InputObject (Get-Content -Path $testArtifacts\FolderDeploymentType.json | Out-String)
                     $testFolder = ConvertFrom-Json -InputObject (Get-Content -Path $testArtifacts\FolderReturnType.json | Out-String)
@@ -789,7 +789,7 @@ InModuleScope $env:BHProjectName {
 
                     Mock -CommandName New-BurpSuiteFolder
                     Mock -CommandName New-BurpSuiteSite
-                    Mock -CommandName Update-BurpSuiteSiteApplicationLogin
+                    Mock -CommandName Update-BurpSuiteSiteLoginCredential
 
                     # act
                     $deployment = $testSiteDeployment | Invoke-BurpSuiteResource
@@ -798,7 +798,7 @@ InModuleScope $env:BHProjectName {
                     Should -Invoke -CommandName New-BurpSuiteFolder -Times 0 -Scope It
                     Should -Invoke -CommandName New-BurpSuiteSite -Times 0 -Scope It
 
-                    Should -Invoke -CommandName Update-BurpSuiteSiteApplicationLogin -ParameterFilter {
+                    Should -Invoke -CommandName Update-BurpSuiteSiteLoginCredential -ParameterFilter {
                         $Id -eq $testSite.application_logins.login_credentials[0].id `
                             -and $Credential.GetNetworkCredential().UserName -eq $testSiteDeployment.Properties.applicationLogins.loginCredentials[0].username `
                             -and $Credential.GetNetworkCredential().Password -eq $testSiteDeployment.Properties.applicationLogins.loginCredentials[0].password
@@ -809,7 +809,7 @@ InModuleScope $env:BHProjectName {
                     $deployment.ProvisioningState | Should -Be $testResult.ProvisioningState
                 }
 
-                It "should call New-BurpSuiteSiteApplicationLogin when application login does exist" {
+                It "should call New-BurpSuiteSiteLoginCredential when application login does exist" {
                     # arrange
                     $testFolderDeployment = ConvertFrom-Json -InputObject (Get-Content -Path $testArtifacts\FolderDeploymentType.json | Out-String)
                     $testFolder = ConvertFrom-Json -InputObject (Get-Content -Path $testArtifacts\FolderReturnType.json | Out-String)
@@ -848,7 +848,7 @@ InModuleScope $env:BHProjectName {
 
                     Mock -CommandName New-BurpSuiteFolder
                     Mock -CommandName New-BurpSuiteSite
-                    Mock -CommandName New-BurpSuiteSiteApplicationLogin
+                    Mock -CommandName New-BurpSuiteSiteLoginCredential
 
                     # act
                     $deployment = $testSiteDeployment | Invoke-BurpSuiteResource
@@ -857,7 +857,7 @@ InModuleScope $env:BHProjectName {
                     Should -Invoke -CommandName New-BurpSuiteFolder -Times 0 -Scope It
                     Should -Invoke -CommandName New-BurpSuiteSite -Times 0 -Scope It
 
-                    Should -Invoke -CommandName New-BurpSuiteSiteApplicationLogin -ParameterFilter {
+                    Should -Invoke -CommandName New-BurpSuiteSiteLoginCredential -ParameterFilter {
                         $SiteId -eq $testSite.id `
                             -and $Label -eq $testSiteDeployment.Properties.applicationLogins.loginCredentials[0].label `
                             -and $Credential.GetNetworkCredential().UserName -eq $testSiteDeployment.Properties.applicationLogins.loginCredentials[0].username `

@@ -114,9 +114,9 @@ function Invoke-BurpSuiteResource {
                                         $appCredential = New-Object -TypeName PSCredential -ArgumentList $loginCredential.username, $appPass
                                         $appLogin = $resource.application_logins.login_credentials | Where-Object { $_.label -eq $loginCredential.label }
                                         if ($null -eq $appLogin) {
-                                            New-BurpSuiteSiteApplicationLogin -SiteId $resource.id -Label $loginCredential.label -Credential $appCredential | Out-Null
+                                            New-BurpSuiteSiteLoginCredential -SiteId $resource.id -Label $loginCredential.label -Credential $appCredential | Out-Null
                                         } else {
-                                            Update-BurpSuiteSiteApplicationLogin -Id $appLogin.id -Credential $appCredential
+                                            Update-BurpSuiteSiteLoginCredential -Id $appLogin.id -Credential $appCredential
                                         }
                                         Start-Sleep -Seconds 1
                                     }
@@ -255,9 +255,9 @@ function Invoke-BurpSuiteResource {
                                             $appCredential = New-Object -TypeName PSCredential -ArgumentList $loginCredential.username, $appPass
                                             $appLogin = $resource.application_logins.login_credentials | Where-Object { $_.label -eq $loginCredential.label }
                                             if ($null -eq $appLogin) {
-                                                New-BurpSuiteSiteApplicationLogin -SiteId $resource.id -Label $loginCredential.label -Credential $appCredential | Out-Null
+                                                New-BurpSuiteSiteLoginCredential -SiteId $resource.id -Label $loginCredential.label -Credential $appCredential | Out-Null
                                             } else {
-                                                Update-BurpSuiteSiteApplicationLogin -Id $appLogin.id -Credential $appCredential
+                                                Update-BurpSuiteSiteLoginCredential -Id $appLogin.id -Credential $appCredential
                                             }
                                             Start-Sleep -Seconds 1
                                         }
