@@ -120,6 +120,7 @@ InModuleScope $env:BHProjectName {
                 Mock -CommandName Update-BurpSuiteSiteApplicationLogin
                 Mock -CommandName Update-BurpSuiteSiteEmailRecipient
                 Mock -CommandName New-BurpSuiteSiteApplicationLogin
+                Mock -CommandName New-BurpSuiteSiteRecordedLogin
                 Mock -CommandName New-BurpSuiteSiteEmailRecipient
 
                 $testArtifacts = Join-Path -Path $PSScriptRoot -ChildPath '..\artifacts'
@@ -133,6 +134,14 @@ InModuleScope $env:BHProjectName {
                 $testResult = ConvertFrom-Json -InputObject (Get-Content -Path $testArtifacts\DeploymentResultType.json | Out-String)
                 $testResult.Id = $testSite.Id
                 $testResult.ResourceId = $testSiteDeployment.ResourceId
+
+                $testPath = "TestDrive:\{0}.json" -f [Guid]::NewGuid()
+                $testPath = New-Item -Path $testPath -ItemType File
+
+                Mock -CommandName _createTempFile -MockWith {
+                    Out-File -NoNewline -InputObject $InputObject -FilePath $testPath
+                    $testPath
+                }
 
                 Mock -CommandName New-BurpSuiteSite -MockWith {
                     $testSite
@@ -149,9 +158,11 @@ InModuleScope $env:BHProjectName {
                         -and $Scope.ExcludedUrls[0] -eq $testSiteDeployment.Properties.Scope.ExcludedUrls[0] `
                         -and $ScanConfigurationIds[0] -eq $testSiteDeployment.Properties.ScanConfigurationIds[0] `
                         -and $EmailRecipients[0].email -eq $testSiteDeployment.Properties.EmailRecipients[0].email `
-                        -and $ApplicationLogins[0].label -eq $testSiteDeployment.Properties.ApplicationLogins[0].label `
-                        -and (($ApplicationLogins[0].Credential).GetNetworkCredential()).username -eq $testSiteDeployment.Properties.ApplicationLogins[0].username `
-                        -and (($ApplicationLogins[0].Credential).GetNetworkCredential()).password -eq $testSiteDeployment.Properties.ApplicationLogins[0].password
+                        -and $LoginCredentials[0].label -eq $testSiteDeployment.Properties.ApplicationLogins.loginCredentials[0].label `
+                        -and (($LoginCredentials[0].Credential).GetNetworkCredential()).username -eq $testSiteDeployment.Properties.ApplicationLogins.loginCredentials[0].username `
+                        -and (($LoginCredentials[0].Credential).GetNetworkCredential()).password -eq $testSiteDeployment.Properties.ApplicationLogins.loginCredentials[0].password `
+                        -and $RecordedLogins[0].label -eq $testSiteDeployment.Properties.ApplicationLogins.recordedLogins[0].label `
+                        -and $RecordedLogins[0].filePath -eq $testPath.FullName
                 }
 
                 $deployment.Id | Should -Be $testResult.Id
@@ -201,6 +212,7 @@ InModuleScope $env:BHProjectName {
                     $testSite.scope = $null
                     $testSite.scan_configurations = $null
                     $testSite.email_recipients = $null
+                    $testSite.application_logins.recorded_logins = $null
 
                     $testResult = ConvertFrom-Json -InputObject (Get-Content -Path $testArtifacts\DeploymentResultType.json | Out-String)
                     $testResult.Id = $testSite.Id
@@ -222,6 +234,7 @@ InModuleScope $env:BHProjectName {
 
                     Mock -CommandName New-BurpSuiteFolder
                     Mock -CommandName New-BurpSuiteSite
+                    Mock -CommandName New-BurpSuiteSiteRecordedLogin
                     Mock -CommandName Update-BurpSuiteSiteApplicationLogin
 
                     # act
@@ -232,9 +245,9 @@ InModuleScope $env:BHProjectName {
                     Should -Invoke -CommandName New-BurpSuiteSite -Times 0 -Scope It
 
                     Should -Invoke -CommandName Update-BurpSuiteSiteApplicationLogin -ParameterFilter {
-                        $Id -eq $testSite.application_logins[0].id `
-                            -and $Credential.GetNetworkCredential().UserName -eq $testSiteDeployment.Properties.applicationLogins[0].username `
-                            -and $Credential.GetNetworkCredential().Password -eq $testSiteDeployment.Properties.applicationLogins[0].password
+                        $Id -eq $testSite.application_logins.login_credentials[0].id `
+                            -and $Credential.GetNetworkCredential().UserName -eq $testSiteDeployment.Properties.applicationLogins.loginCredentials[0].username `
+                            -and $Credential.GetNetworkCredential().Password -eq $testSiteDeployment.Properties.applicationLogins.loginCredentials[0].password
                     }
 
                     $deployment.Id | Should -Be $testResult.Id
@@ -245,6 +258,7 @@ InModuleScope $env:BHProjectName {
                 It "should call New-BurpSuiteSiteApplicationLogin when application login does exist" {
                     # arrange
                     $testSiteDeployment = ConvertFrom-Json -InputObject (Get-Content -Path $testArtifacts\SiteDeploymentType.json | Out-String)
+                    $testSiteDeployment.Properties.applicationLogins.recordedLogins = $null
 
                     $testSite = ConvertFrom-Json -InputObject (Get-Content -Path $testArtifacts\SiteReturnType.json | Out-String)
                     $testSite.application_logins = $null
@@ -283,9 +297,75 @@ InModuleScope $env:BHProjectName {
 
                     Should -Invoke -CommandName New-BurpSuiteSiteApplicationLogin -ParameterFilter {
                         $SiteId -eq $testSite.id `
-                            -and $Label -eq $testSiteDeployment.Properties.applicationLogins[0].label `
-                            -and $Credential.GetNetworkCredential().UserName -eq $testSiteDeployment.Properties.applicationLogins[0].username `
-                            -and $Credential.GetNetworkCredential().Password -eq $testSiteDeployment.Properties.applicationLogins[0].password
+                            -and $Label -eq $testSiteDeployment.Properties.applicationLogins.loginCredentials[0].label `
+                            -and $Credential.GetNetworkCredential().UserName -eq $testSiteDeployment.Properties.applicationLogins.loginCredentials[0].username `
+                            -and $Credential.GetNetworkCredential().Password -eq $testSiteDeployment.Properties.applicationLogins.loginCredentials[0].password
+                    }
+
+                    $deployment.Id | Should -Be $testResult.Id
+                    $deployment.ResourceId | Should -Be $testResult.ResourceId
+                    $deployment.ProvisioningState | Should -Be $testResult.ProvisioningState
+                }
+
+                AfterEach {
+                    [DeploymentCache]::Deployments = @()
+                    [ScanConfigurationCache]::ScanConfigurations = @()
+                    [SiteTreeCache]::SiteTree = $null
+                }
+            }
+
+            Context "Recorded Logins" {
+                It "should call New-BurpSuiteSiteRecordedLogin when application login does exist" {
+                    # arrange
+                    $testSiteDeployment = ConvertFrom-Json -InputObject (Get-Content -Path $testArtifacts\SiteDeploymentType.json | Out-String)
+
+                    $testSite = ConvertFrom-Json -InputObject (Get-Content -Path $testArtifacts\SiteReturnType.json | Out-String)
+                    $testSite.application_logins = $null
+                    $testSite.scope = $null
+                    $testSite.scan_configurations = $null
+                    $testSite.email_recipients = $null
+
+                    $testResult = ConvertFrom-Json -InputObject (Get-Content -Path $testArtifacts\DeploymentResultType.json | Out-String)
+                    $testResult.Id = $testSite.Id
+                    $testResult.ResourceId = $testSiteDeployment.ResourceId
+
+                    [DeploymentCache]::Deployments = @()
+
+                    Mock -CommandName Get-BurpSuiteSiteTree -MockWith {
+                        [PSCustomObject]@{
+                            folders = @(
+                                [PSCustomObject]@{id = [guid]::NewGuid(); parent_id = 0; name = 'Root' },
+                                $testFolder
+                            )
+                            sites   = @(
+                                $testSite
+                            )
+                        }
+                    }
+
+                    $testPath = "TestDrive:\{0}.json" -f [Guid]::NewGuid()
+                    $testPath = New-Item -Path $testPath -ItemType File
+
+                    Mock -CommandName _createTempFile -MockWith {
+                        Out-File -NoNewline -InputObject $InputObject -FilePath $testPath
+                        $testPath
+                    }
+
+                    Mock -CommandName New-BurpSuiteFolder
+                    Mock -CommandName New-BurpSuiteSite
+                    Mock -CommandName New-BurpSuiteSiteRecordedLogin
+
+                    # act
+                    $deployment = $testSiteDeployment | Invoke-BurpSuiteResource
+
+                    # assert
+                    Should -Invoke -CommandName New-BurpSuiteFolder -Times 0 -Scope It
+                    Should -Invoke -CommandName New-BurpSuiteSite -Times 0 -Scope It
+
+                    Should -Invoke -CommandName New-BurpSuiteSiteRecordedLogin -ParameterFilter {
+                        $SiteId -eq $testSite.id `
+                            -and $Label -eq $testSiteDeployment.Properties.applicationLogins.recordedLogins[0].label `
+                            -and $FilePath -eq $testPath.FullName
                     }
 
                     $deployment.Id | Should -Be $testResult.Id
@@ -352,6 +432,7 @@ InModuleScope $env:BHProjectName {
                 It "should call New-BurpSuiteSiteEmailRecipient when email recipient does exist" {
                     # arrange
                     $testSiteDeployment = ConvertFrom-Json -InputObject (Get-Content -Path $testArtifacts\SiteDeploymentType.json | Out-String)
+                    $testSiteDeployment.Properties.applicationLogins = $null
 
                     $testSite = ConvertFrom-Json -InputObject (Get-Content -Path $testArtifacts\SiteReturnType.json | Out-String)
                     $testSite.application_logins = $null
@@ -538,6 +619,14 @@ InModuleScope $env:BHProjectName {
                         $testSite
                     }
 
+                    $testPath = "TestDrive:\{0}.json" -f [Guid]::NewGuid()
+                    $testPath = New-Item -Path $testPath -ItemType File
+
+                    Mock -CommandName _createTempFile -MockWith {
+                        Out-File -NoNewline -InputObject $InputObject -FilePath $testPath
+                        $testPath
+                    }
+
                     # act
                     $deployment = $testSiteDeployment | Invoke-BurpSuiteResource
 
@@ -549,9 +638,10 @@ InModuleScope $env:BHProjectName {
                             -and $Scope.ExcludedUrls[0] -eq $testSiteDeployment.Properties.Scope.ExcludedUrls[0] `
                             -and $ScanConfigurationIds[0] -eq $testScanConfigurationResult.id `
                             -and $EmailRecipients[0].email -eq $testSiteDeployment.Properties.EmailRecipients[0].email `
-                            -and $ApplicationLogins[0].label -eq $testSiteDeployment.Properties.ApplicationLogins[0].label `
-                            -and (($ApplicationLogins[0].Credential).GetNetworkCredential()).username -eq $testSiteDeployment.Properties.ApplicationLogins[0].username `
-                            -and (($ApplicationLogins[0].Credential).GetNetworkCredential()).password -eq $testSiteDeployment.Properties.ApplicationLogins[0].password
+                            -and (($LoginCredentials[0].Credential).GetNetworkCredential()).username -eq $testSiteDeployment.Properties.ApplicationLogins.loginCredentials[0].username `
+                            -and (($LoginCredentials[0].Credential).GetNetworkCredential()).password -eq $testSiteDeployment.Properties.ApplicationLogins.loginCredentials[0].password `
+                            -and $RecordedLogins[0].label -eq $testSiteDeployment.Properties.ApplicationLogins.recordedLogins[0].label `
+                            -and $RecordedLogins[0].filePath -eq $testPath.FullName
                     }
 
                     $deployment.Id | Should -Be $testResult.Id
@@ -599,6 +689,7 @@ InModuleScope $env:BHProjectName {
                 Mock -CommandName Update-BurpSuiteSiteApplicationLogin
                 Mock -CommandName Update-BurpSuiteSiteEmailRecipient
                 Mock -CommandName New-BurpSuiteSiteApplicationLogin
+                Mock -CommandName New-BurpSuiteSiteRecordedLogin
                 Mock -CommandName New-BurpSuiteSiteEmailRecipient
 
 
@@ -629,6 +720,14 @@ InModuleScope $env:BHProjectName {
                     $testSite
                 }
 
+                $testPath = "TestDrive:\{0}.json" -f [Guid]::NewGuid()
+                $testPath = New-Item -Path $testPath -ItemType File
+
+                Mock -CommandName _createTempFile -MockWith {
+                    Out-File -NoNewline -InputObject $InputObject -FilePath $testPath
+                    $testPath
+                }
+
                 # act
                 $deployment = $testSiteDeployment | Invoke-BurpSuiteResource
 
@@ -639,9 +738,11 @@ InModuleScope $env:BHProjectName {
                         -and $Scope.ExcludedUrls[0] -eq $testSiteDeployment.Properties.scope.excludedUrls[0] `
                         -and $ScanConfigurationIds[0] -eq $testSiteDeployment.Properties.scanConfigurationIds[0] `
                         -and $EmailRecipients[0].email -eq $testSiteDeployment.Properties.EmailRecipients[0].email `
-                        -and $ApplicationLogins[0].label -eq $testSiteDeployment.Properties.ApplicationLogins[0].label `
-                        -and (($ApplicationLogins[0].Credential).GetNetworkCredential()).username -eq $testSiteDeployment.Properties.ApplicationLogins[0].username `
-                        -and (($ApplicationLogins[0].Credential).GetNetworkCredential()).password -eq $testSiteDeployment.Properties.ApplicationLogins[0].password
+                        -and $LoginCredentials[0].label -eq $testSiteDeployment.Properties.applicationLogins.loginCredentials[0].label `
+                        -and (($LoginCredentials[0].Credential).GetNetworkCredential()).username -eq $testSiteDeployment.Properties.applicationLogins.loginCredentials[0].username `
+                        -and (($LoginCredentials[0].Credential).GetNetworkCredential()).password -eq $testSiteDeployment.Properties.applicationLogins.loginCredentials[0].password `
+                        -and $RecordedLogins[0].label -eq $testSiteDeployment.Properties.applicationLogins.recordedLogins[0].label `
+                        -and $RecordedLogins[0].filePath -eq $testPath.FullName
                 }
 
                 $deployment.Id | Should -Be $testResult.Id
@@ -698,9 +799,9 @@ InModuleScope $env:BHProjectName {
                     Should -Invoke -CommandName New-BurpSuiteSite -Times 0 -Scope It
 
                     Should -Invoke -CommandName Update-BurpSuiteSiteApplicationLogin -ParameterFilter {
-                        $Id -eq $testSite.application_logins[0].id `
-                            -and $Credential.GetNetworkCredential().UserName -eq $testSiteDeployment.Properties.applicationLogins[0].username `
-                            -and $Credential.GetNetworkCredential().Password -eq $testSiteDeployment.Properties.applicationLogins[0].password
+                        $Id -eq $testSite.application_logins.login_credentials[0].id `
+                            -and $Credential.GetNetworkCredential().UserName -eq $testSiteDeployment.Properties.applicationLogins.loginCredentials[0].username `
+                            -and $Credential.GetNetworkCredential().Password -eq $testSiteDeployment.Properties.applicationLogins.loginCredentials[0].password
                     }
 
                     $deployment.Id | Should -Be $testResult.Id
@@ -758,9 +859,84 @@ InModuleScope $env:BHProjectName {
 
                     Should -Invoke -CommandName New-BurpSuiteSiteApplicationLogin -ParameterFilter {
                         $SiteId -eq $testSite.id `
-                            -and $Label -eq $testSiteDeployment.Properties.applicationLogins[0].label `
-                            -and $Credential.GetNetworkCredential().UserName -eq $testSiteDeployment.Properties.applicationLogins[0].username `
-                            -and $Credential.GetNetworkCredential().Password -eq $testSiteDeployment.Properties.applicationLogins[0].password
+                            -and $Label -eq $testSiteDeployment.Properties.applicationLogins.loginCredentials[0].label `
+                            -and $Credential.GetNetworkCredential().UserName -eq $testSiteDeployment.Properties.applicationLogins.loginCredentials[0].username `
+                            -and $Credential.GetNetworkCredential().Password -eq $testSiteDeployment.Properties.applicationLogins.loginCredentials[0].password
+                    }
+
+                    $deployment.Id | Should -Be $testResult.Id
+                    $deployment.ResourceId | Should -Be $testResult.ResourceId
+                    $deployment.ProvisioningState | Should -Be $testResult.ProvisioningState
+                }
+
+                AfterEach {
+                    [DeploymentCache]::Deployments = @()
+                    [ScanConfigurationCache]::ScanConfigurations = @()
+                    [SiteTreeCache]::SiteTree = $null
+                }
+            }
+
+            Context "Recorded Logins" {
+                It "should call New-BurpSuiteSiteRecordedLogin when application login does exist" {
+                    # arrange
+                    $testFolderDeployment = ConvertFrom-Json -InputObject (Get-Content -Path $testArtifacts\FolderDeploymentType.json | Out-String)
+                    $testFolder = ConvertFrom-Json -InputObject (Get-Content -Path $testArtifacts\FolderReturnType.json | Out-String)
+
+                    $testFolderResult = ConvertFrom-Json -InputObject (Get-Content -Path $testArtifacts\DeploymentResultType.json | Out-String)
+                    $testFolderResult.Id = $testFolder.Id
+                    $testFolderResult.ResourceId = $testFolderDeployment.ResourceId
+
+                    $testSiteDeployment = ConvertFrom-Json -InputObject (Get-Content -Path $testArtifacts\FolderSiteDeploymentType.json | Out-String)
+
+                    $testSite = ConvertFrom-Json -InputObject (Get-Content -Path $testArtifacts\FolderSiteReturnType.json | Out-String)
+                    $testSite.application_logins = $null
+                    $testSite.scope = $null
+                    $testSite.scan_configurations = $null
+                    $testSite.email_recipients = $null
+
+                    $testResult = ConvertFrom-Json -InputObject (Get-Content -Path $testArtifacts\DeploymentResultType.json | Out-String)
+                    $testResult.Id = $testSite.Id
+                    $testResult.ResourceId = $testSiteDeployment.ResourceId
+
+                    [DeploymentCache]::Deployments = @(
+                        $testFolderResult
+                    )
+
+                    Mock -CommandName Get-BurpSuiteSiteTree -MockWith {
+                        [PSCustomObject]@{
+                            folders = @(
+                                [PSCustomObject]@{id = [guid]::NewGuid(); parent_id = 0; name = 'Root' },
+                                $testFolder
+                            )
+                            sites   = @(
+                                $testSite
+                            )
+                        }
+                    }
+
+                    $testPath = "TestDrive:\{0}.json" -f [Guid]::NewGuid()
+                    $testPath = New-Item -Path $testPath -ItemType File
+
+                    Mock -CommandName _createTempFile -MockWith {
+                        Out-File -NoNewline -InputObject $InputObject -FilePath $testPath
+                        $testPath
+                    }
+
+                    Mock -CommandName New-BurpSuiteFolder
+                    Mock -CommandName New-BurpSuiteSite
+                    Mock -CommandName New-BurpSuiteSiteRecordedLogin
+
+                    # act
+                    $deployment = $testSiteDeployment | Invoke-BurpSuiteResource
+
+                    # assert
+                    Should -Invoke -CommandName New-BurpSuiteFolder -Times 0 -Scope It
+                    Should -Invoke -CommandName New-BurpSuiteSite -Times 0 -Scope It
+
+                    Should -Invoke -CommandName New-BurpSuiteSiteRecordedLogin -ParameterFilter {
+                        $SiteId -eq $testSite.id `
+                            -and $Label -eq $testSiteDeployment.Properties.applicationLogins.recordedLogins[0].label `
+                            -and $FilePath -eq $testPath.FullName
                     }
 
                     $deployment.Id | Should -Be $testResult.Id

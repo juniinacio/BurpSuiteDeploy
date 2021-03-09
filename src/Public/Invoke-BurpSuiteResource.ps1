@@ -51,13 +51,25 @@ function Invoke-BurpSuiteResource {
                             }
 
                             if ($null -ne ($InputObject.Properties.applicationLogins)) {
-                                $applicationLogins = @()
+                                if ($null -ne ($InputObject.Properties.applicationLogins.loginCredentials)) {
+                                    $loginCredentials = @()
 
-                                foreach ($applicationLogin in $InputObject.Properties.applicationLogins) {
-                                    $applicationLogins += [PSCustomObject]@{ Label = $applicationLogin.Label; Credential = (New-Object System.Management.Automation.PSCredential ($applicationLogin.Username, $(ConvertTo-SecureString $applicationLogin.Password -AsPlainText -Force))) }
+                                    foreach ($loginCredential in $InputObject.Properties.applicationLogins.loginCredentials) {
+                                        $loginCredentials += [PSCustomObject]@{ Label = $loginCredential.Label; Credential = (New-Object System.Management.Automation.PSCredential ($loginCredential.Username, $(ConvertTo-SecureString $loginCredential.Password -AsPlainText -Force))) }
+                                    }
+
+                                    $parameters.LoginCredentials = $loginCredentials
                                 }
 
-                                $parameters.ApplicationLogins = $applicationLogins
+                                if ($null -ne ($InputObject.Properties.applicationLogins.recordedLogins)) {
+                                    $recordedLogins = @()
+
+                                    foreach ($recordedLogin in $InputObject.Properties.applicationLogins.recordedLogins) {
+                                        $recordedLogins += [PSCustomObject]@{ Label = $recordedLogin.Label; FilePath = (_createTempFile -InputObject $recordedLogin.script).FullName }
+                                    }
+
+                                    $parameters.RecordedLogins = $recordedLogins
+                                }
                             }
 
                             $resource = New-BurpSuiteSite @parameters
@@ -95,17 +107,30 @@ function Invoke-BurpSuiteResource {
                             $resource = [SiteTreeCache]::Get(0, $InputObject.Name, 'Sites')
 
                             if ($null -ne ($InputObject.Properties.applicationLogins)) {
-                                Write-Verbose " Updating application logins..."
-                                foreach ($applicationLogin in $InputObject.Properties.applicationLogins) {
-                                    $appPass = ConvertTo-SecureString -String $applicationLogin.password -AsPlainText -Force
-                                    $appCredential = New-Object -TypeName PSCredential -ArgumentList $applicationLogin.username, $appPass
-                                    $appLogin = $resource.application_logins | Where-Object { $_.label -eq $applicationLogin.label }
-                                    if ($null -eq $appLogin) {
-                                        New-BurpSuiteSiteApplicationLogin -SiteId $resource.id -Label $applicationLogin.label -Credential $appCredential | Out-Null
-                                    } else {
-                                        Update-BurpSuiteSiteApplicationLogin -Id $appLogin.id -Credential $appCredential
+                                if ($null -ne ($InputObject.Properties.applicationLogins.loginCredentials)) {
+                                    Write-Verbose " Updating application logins..."
+                                    foreach ($loginCredential in $InputObject.Properties.applicationLogins.loginCredentials) {
+                                        $appPass = ConvertTo-SecureString -String $loginCredential.password -AsPlainText -Force
+                                        $appCredential = New-Object -TypeName PSCredential -ArgumentList $loginCredential.username, $appPass
+                                        $appLogin = $resource.application_logins.login_credentials | Where-Object { $_.label -eq $loginCredential.label }
+                                        if ($null -eq $appLogin) {
+                                            New-BurpSuiteSiteApplicationLogin -SiteId $resource.id -Label $loginCredential.label -Credential $appCredential | Out-Null
+                                        } else {
+                                            Update-BurpSuiteSiteApplicationLogin -Id $appLogin.id -Credential $appCredential
+                                        }
+                                        Start-Sleep -Seconds 1
                                     }
-                                    Start-Sleep -Seconds 1
+                                }
+
+                                if ($null -ne ($InputObject.Properties.applicationLogins.recordedLogins)) {
+                                    Write-Verbose " Updating recorded logins..."
+                                    foreach ($recordedLogin in $InputObject.Properties.applicationLogins.recordedLogins) {
+                                        $appLogin = $resource.application_logins.recorded_logins | Where-Object { $_.label -eq $recordedLogin.label }
+                                        if ($null -eq $appLogin) {
+                                            New-BurpSuiteSiteRecordedLogin -SiteId $resource.id -Label $recordedLogin.label -FilePath (_createTempFile -InputObject $recordedLogin.script).FullName | Out-Null
+                                        }
+                                        Start-Sleep -Seconds 1
+                                    }
                                 }
                             }
 
@@ -168,13 +193,25 @@ function Invoke-BurpSuiteResource {
                                 }
 
                                 if ($null -ne ($InputObject.Properties.applicationLogins)) {
-                                    $applicationLogins = @()
+                                    if ($null -ne ($InputObject.Properties.applicationLogins.loginCredentials)) {
+                                        $loginCredentials = @()
 
-                                    foreach ($applicationLogin in $InputObject.Properties.applicationLogins) {
-                                        $applicationLogins += [PSCustomObject]@{ Label = $applicationLogin.Label; Credential = (New-Object System.Management.Automation.PSCredential ($applicationLogin.Username, $(ConvertTo-SecureString $applicationLogin.Password -AsPlainText -Force))) }
+                                        foreach ($loginCredential in $InputObject.Properties.applicationLogins.loginCredentials) {
+                                            $loginCredentials += [PSCustomObject]@{ Label = $loginCredential.Label; Credential = (New-Object System.Management.Automation.PSCredential ($loginCredential.Username, $(ConvertTo-SecureString $loginCredential.Password -AsPlainText -Force))) }
+                                        }
+
+                                        $parameters.LoginCredentials = $loginCredentials
                                     }
 
-                                    $parameters.ApplicationLogins = $applicationLogins
+                                    if ($null -ne ($InputObject.Properties.applicationLogins.recordedLogins)) {
+                                        $recordedLogins = @()
+
+                                        foreach ($recordedLogin in $InputObject.Properties.applicationLogins.recordedLogins) {
+                                            $recordedLogins += [PSCustomObject]@{ Label = $recordedLogin.Label; FilePath = (_createTempFile -InputObject $recordedLogin.script).FullName }
+                                        }
+
+                                        $parameters.RecordedLogins = $recordedLogins
+                                    }
                                 }
 
                                 $resource = New-BurpSuiteSite @parameters
@@ -211,17 +248,30 @@ function Invoke-BurpSuiteResource {
                                 $resource = [SiteTreeCache]::Get($parentResource.Id, $InputObject.Name, 'Sites')
 
                                 if ($null -ne ($InputObject.Properties.applicationLogins)) {
-                                    Write-Verbose " Updating application logins..."
-                                    foreach ($applicationLogin in $InputObject.Properties.applicationLogins) {
-                                        $appPass = ConvertTo-SecureString -String $applicationLogin.password -AsPlainText -Force
-                                        $appCredential = New-Object -TypeName PSCredential -ArgumentList $applicationLogin.username, $appPass
-                                        $appLogin = $resource.application_logins | Where-Object { $_.label -eq $applicationLogin.label }
-                                        if ($null -eq $appLogin) {
-                                            New-BurpSuiteSiteApplicationLogin -SiteId $resource.id -Label $applicationLogin.label -Credential $appCredential | Out-Null
-                                        } else {
-                                            Update-BurpSuiteSiteApplicationLogin -Id $appLogin.id -Credential $appCredential
+                                    if ($null -ne ($InputObject.Properties.applicationLogins.loginCredentials)) {
+                                        Write-Verbose " Updating application logins..."
+                                        foreach ($loginCredential in $InputObject.Properties.applicationLogins.loginCredentials) {
+                                            $appPass = ConvertTo-SecureString -String $loginCredential.password -AsPlainText -Force
+                                            $appCredential = New-Object -TypeName PSCredential -ArgumentList $loginCredential.username, $appPass
+                                            $appLogin = $resource.application_logins.login_credentials | Where-Object { $_.label -eq $loginCredential.label }
+                                            if ($null -eq $appLogin) {
+                                                New-BurpSuiteSiteApplicationLogin -SiteId $resource.id -Label $loginCredential.label -Credential $appCredential | Out-Null
+                                            } else {
+                                                Update-BurpSuiteSiteApplicationLogin -Id $appLogin.id -Credential $appCredential
+                                            }
+                                            Start-Sleep -Seconds 1
                                         }
-                                        Start-Sleep -Seconds 1
+                                    }
+
+                                    if ($null -ne ($InputObject.Properties.applicationLogins.recordedLogins)) {
+                                        Write-Verbose " Updating recorded logins..."
+                                        foreach ($recordedLogin in $InputObject.Properties.applicationLogins.recordedLogins) {
+                                            $appLogin = $resource.application_logins.recorded_logins | Where-Object { $_.label -eq $recordedLogin.label }
+                                            if ($null -eq $appLogin) {
+                                                New-BurpSuiteSiteRecordedLogin -SiteId $resource.id -Label $recordedLogin.label -FilePath (_createTempFile -InputObject $recordedLogin.script).FullName | Out-Null
+                                            }
+                                            Start-Sleep -Seconds 1
+                                        }
                                     }
                                 }
 
