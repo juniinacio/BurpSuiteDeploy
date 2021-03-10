@@ -17,9 +17,10 @@ param(
 
 $ErrorActionPreference = 'Stop'
 
+[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+
 # Bootstrap dependencies
 if ($Bootstrap.IsPresent) {
-    [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
     Get-PackageProvider -Name Nuget -ForceBootstrap | Out-Null
     Install-Module PowerShellGet -MinimumVersion 2.2.4 -SkipPublisherCheck
     Set-PSRepository -Name PSGallery -InstallationPolicy Trusted
