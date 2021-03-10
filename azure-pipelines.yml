@@ -200,7 +200,7 @@ stages:
                 pwsh: true
 
             - task: PowerShell@2
-              displayName: 'Register Private Repository'
+              displayName: 'Install BurpSuite'
               inputs:
                 targetType: 'inline'
                 script: |
