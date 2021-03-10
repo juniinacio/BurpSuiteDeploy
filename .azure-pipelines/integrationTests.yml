@@ -48,33 +48,33 @@ jobs:
               inputs:
                 targetType: 'inline'
                 script: |
-                  [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
-                  Install-PackageProvider -Name NuGet -Force
-                  Install-Module -Name PowerShellGet -Force
+                  # [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+                  Get-PackageProvider -Name Nuget -ForceBootstrap | Out-Null
+                  Install-Module PowerShellGet -MinimumVersion 2.2.4 -SkipPublisherCheck
                 pwsh: ${{ parameters.pwsh }}
-              condition: eq('${{ parameters.pwsh }}', false)
+              # condition: eq('${{ parameters.pwsh }}', false)
 
-            - task: PowerShell@2
-              displayName: 'Register Private Repository'
-              inputs:
-                targetType: 'inline'
-                script: |
-                  $n = "BurpSuite"
-                  $e = "$(ARTIFACTS_EMAIL)"
-                  $url = "$(ARTIFACTS_URL)"
-                  $pwd = ConvertTo-SecureString $Env:ARTIFACTS_PAT -AsPlainText -Force
-                  $creds = New-Object PSCredential($e, $pwd)
+            # - task: PowerShell@2
+            #   displayName: 'Register Private Repository'
+            #   inputs:
+            #     targetType: 'inline'
+            #     script: |
+            #       $n = "BurpSuite"
+            #       $e = "$(ARTIFACTS_EMAIL)"
+            #       $url = "$(ARTIFACTS_URL)"
+            #       $pwd = ConvertTo-SecureString $Env:ARTIFACTS_PAT -AsPlainText -Force
+            #       $creds = New-Object PSCredential($e, $pwd)
 
-                  [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+            #       [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 
-                  # LINK: https://github.com/Microsoft/artifacts-credprovider
-                  $Env:NUGET_CREDENTIALPROVIDER_SESSIONTOKENCACHE_ENABLED = 'true'
-                  $Env:VSS_NUGET_EXTERNAL_FEED_ENDPOINTS = '{{"endpointCredentials": [{{"endpoint":"{0}", "username":"{1}", "password":"{2}"}}]}}' -f $url, $e, $pwd
+            #       # LINK: https://github.com/Microsoft/artifacts-credprovider
+            #       $Env:NUGET_CREDENTIALPROVIDER_SESSIONTOKENCACHE_ENABLED = 'true'
+            #       $Env:VSS_NUGET_EXTERNAL_FEED_ENDPOINTS = '{{"endpointCredentials": [{{"endpoint":"{0}", "username":"{1}", "password":"{2}"}}]}}' -f $url, $e, $pwd
 
-                  if(-not (Get-PSRepository | ? Name -eq $n)) { Register-PSRepository -Credential $creds -Name $n -SourceLocation $url -PublishLocation $url -InstallationPolicy Trusted }
-                pwsh: ${{ parameters.pwsh }}
-              env:
-                ARTIFACTS_PAT: $(ARTIFACTS_PAT)
+            #       if(-not (Get-PSRepository | ? Name -eq $n)) { Register-PSRepository -Credential $creds -Name $n -SourceLocation $url -PublishLocation $url -InstallationPolicy Trusted }
+            #     pwsh: ${{ parameters.pwsh }}
+            #   env:
+            #     ARTIFACTS_PAT: $(ARTIFACTS_PAT)
 
             - task: PowerShell@2
               displayName: 'Install BurpSuite Module'
