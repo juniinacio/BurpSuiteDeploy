@@ -14,6 +14,10 @@ steps:
         $pwd = ConvertTo-SecureString $Env:ARTIFACTS_PAT -AsPlainText -Force
         $creds = New-Object PSCredential($e, $pwd)
 
+        [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+        Get-PackageProvider -Name Nuget -ForceBootstrap | Out-Null
+        Install-Module PowerShellGet -MinimumVersion 2.2.4 -SkipPublisherCheck
+
         # LINK: https://github.com/Microsoft/artifacts-credprovider
         $Env:NUGET_CREDENTIALPROVIDER_SESSIONTOKENCACHE_ENABLED = 'true'
         $Env:VSS_NUGET_EXTERNAL_FEED_ENDPOINTS = '{{"endpointCredentials": [{{"endpoint":"{0}", "username":"{1}", "password":"{2}"}}]}}' -f $url, $e, $pwd
