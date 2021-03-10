@@ -56,11 +56,11 @@ stages:
   #   pool:
   #     vmImage: windows-latest
 
-    steps:
-    - template: .azure-pipelines/unitTests.yml
-      parameters:
-        os: 'Windows'
-        pwsh: false
+  #   steps:
+  #   - template: .azure-pipelines/unitTests.yml
+  #     parameters:
+  #       os: 'Windows'
+  #       pwsh: false
 
   - job: Windows_PowerShellCore_Phase
     displayName: Build Windows (Pwsh.exe)
