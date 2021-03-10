@@ -50,12 +50,17 @@ jobs:
               inputs:
                 targetType: 'inline'
                 script: |
-                  $n = 'BurpSuite'
+                  $n = "BurpSuite"
+                  $e = "$(ARTIFACTS_EMAIL)"
                   $url = "$(ARTIFACTS_URL)"
-                  if(-not (Get-PSRepository | Where-Object Name -eq $n)) {
-                      Register-PSRepository -Name $n -SourceLocation $url -InstallationPolicy Trusted -Verbose
-                  }
-                  Get-PSRepository
+                  $pwd = ConvertTo-SecureString "$(ARTIFACTS_PAT)" -AsPlainText -Force
+                  $creds = New-Object PSCredential($e, $pwd)
+
+                  # LINK: https://github.com/Microsoft/artifacts-credprovider
+                  $Env:NUGET_CREDENTIALPROVIDER_SESSIONTOKENCACHE_ENABLED = 'true'
+                  $Env:VSS_NUGET_EXTERNAL_FEED_ENDPOINTS = '{{"endpointCredentials": [{{"endpoint":"{0}", "username":"{1}", "password":"{2}"}}]}}' -f $url, $e, "$(ARTIFACTS_PAT)"
+
+                  if(-not (Get-PSRepository | ? Name -eq $n)) { Register-PSRepository -Credential $creds -Name $n -SourceLocation $url -PublishLocation $url -InstallationPolicy Trusted }
                 pwsh: ${{ parameters.pwsh }}
 
             - task: PowerShell@2
@@ -63,20 +68,18 @@ jobs:
               inputs:
                 targetType: 'inline'
                 script: |
-                    $n = "BurpSuite"
-                    $e = "$(ARTIFACTS_EMAIL)"
-                    $url = "$(ARTIFACTS_URL)"
-                    $pwd = ConvertTo-SecureString $Env:ARTIFACTS_PAT -AsPlainText -Force
-                    $creds = New-Object PSCredential($e, $pwd)
+                  $n = "BurpSuite"
+                  $e = "$(ARTIFACTS_EMAIL)"
+                  $url = "$(ARTIFACTS_URL)"
+                  $pwd = ConvertTo-SecureString "$(ARTIFACTS_PAT)" -AsPlainText -Force # Readonly PAT for Azure DevOps artifacts
+                  $creds = New-Object PSCredential($e, $pwd)
 
-                    # LINK: https://github.com/Microsoft/artifacts-credprovider
-                    # $Env:NUGET_CREDENTIALPROVIDER_SESSIONTOKENCACHE_ENABLED = 'true'
-                    # $Env:VSS_NUGET_EXTERNAL_FEED_ENDPOINTS = '{{"endpointCredentials": [{{"endpoint":"{0}", "username":"{1}", "password":"{2}"}}]}}' -f $url, $e, $pwd
+                  # LINK: https://github.com/Microsoft/artifacts-credprovider
+                  $Env:NUGET_CREDENTIALPROVIDER_SESSIONTOKENCACHE_ENABLED = 'true'
+                  $Env:VSS_NUGET_EXTERNAL_FEED_ENDPOINTS = '{{"endpointCredentials": [{{"endpoint":"{0}", "username":"{1}", "password":"{2}"}}]}}' -f $url, $e, "$(ARTIFACTS_PAT)"
 
-                    Install-Module -Name "BurpSuite" -Repository $n -Credential $creds -Force -Scope CurrentUser
+                  Install-Module -Name "BurpSuite" -Repository $n -Credential $creds -Force -Scope CurrentUser
                 pwsh: ${{ parameters.pwsh }}
-              env:
-                ARTIFACTS_PAT: $(ARTIFACTS_PAT)
 
             - task: PowerShell@2
               displayName: 'Install $(TEST_MODULENAME) Module'
@@ -89,18 +92,16 @@ jobs:
                   $n = "BurpSuite"
                   $e = "$(ARTIFACTS_EMAIL)"
                   $url = "$(ARTIFACTS_URL)"
-                  $pwd = ConvertTo-SecureString $Env:ARTIFACTS_PAT -AsPlainText -Force
+                  $pwd = ConvertTo-SecureString "$(ARTIFACTS_PAT)" -AsPlainText -Force # Readonly PAT for Azure DevOps artifacts
                   $creds = New-Object PSCredential($e, $pwd)
 
                   # LINK: https://github.com/Microsoft/artifacts-credprovider
-                  # $Env:NUGET_CREDENTIALPROVIDER_SESSIONTOKENCACHE_ENABLED = 'true'
-                  # $Env:VSS_NUGET_EXTERNAL_FEED_ENDPOINTS = '{{"endpointCredentials": [{{"endpoint":"{0}", "username":"{1}", "password":"{2}"}}]}}' -f $url, $e, $pwd
+                  $Env:NUGET_CREDENTIALPROVIDER_SESSIONTOKENCACHE_ENABLED = 'true'
+                  $Env:VSS_NUGET_EXTERNAL_FEED_ENDPOINTS = '{{"endpointCredentials": [{{"endpoint":"{0}", "username":"{1}", "password":"{2}"}}]}}' -f $url, $e, "$(ARTIFACTS_PAT)"
 
                   Install-Module -Name "$(TEST_MODULENAME)" -Repository $n -Credential $creds -MaximumVersion $b -MinimumVersion $b -Force -Scope CurrentUser
                 workingDirectory: '$(Pipeline.Workspace)/module'
                 pwsh: ${{ parameters.pwsh }}
-              env:
-                ARTIFACTS_PAT: $(ARTIFACTS_PAT)
 
             - task: PowerShell@2
               displayName: 'Install Pester'
