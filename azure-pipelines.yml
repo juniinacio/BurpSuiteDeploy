@@ -51,9 +51,11 @@ stages:
     - template: .azure-pipelines/unitTests.yml
       parameters:
         os: 'Linux (PowerShell Core)'
+        pwsh: true
 
   - job: Windows_Phase
     displayName: Build Windows (PowerShell.exe)
+    condition: false
     pool:
       vmImage: windows-latest
 
