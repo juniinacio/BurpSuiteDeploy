@@ -55,7 +55,6 @@ stages:
 
   - job: Windows_Phase
     displayName: Build Windows (PowerShell.exe)
-    condition: false
     pool:
       vmImage: windows-latest
 
