@@ -2,7 +2,7 @@ parameters:
   - name: publishToGallery
     displayName: Set to true to publish the module to PSGallery
     type: boolean
-    default: true
+    default: false
 
 name: $(Build.BuildID)
 
@@ -51,9 +51,11 @@ stages:
     - template: .azure-pipelines/unitTests.yml
       parameters:
         os: 'Linux (PowerShell Core)'
+        pwsh: true
 
   - job: Windows_Phase
     displayName: Build Windows (PowerShell.exe)
+    condition: false
     pool:
       vmImage: windows-latest
 
@@ -182,8 +184,23 @@ stages:
       runOnce:
         deploy:
           steps:
+          - task: NuGetAuthenticate@0
+
           - task: PowerShell@2
             displayName: 'Register Private Repository'
+            inputs:
+              targetType: 'inline'
+              script: |
+                $n = 'BurpSuite'
+                $url = "$(ARTIFACTS_URL)"
+                if(-not (Get-PSRepository | Where-Object Name -eq $n)) {
+                    Register-PSRepository -Name $n -SourceLocation $url -InstallationPolicy Trusted -Verbose
+                }
+                Get-PSRepository
+              pwsh: true
+
+          - task: PowerShell@2
+            displayName: 'Install BurpSuite'
             inputs:
               targetType: 'inline'
               script: |
@@ -194,10 +211,8 @@ stages:
                   $creds = New-Object PSCredential($e, $pwd)
 
                   # LINK: https://github.com/Microsoft/artifacts-credprovider
-                  $Env:NUGET_CREDENTIALPROVIDER_SESSIONTOKENCACHE_ENABLED = 'true'
-                  $Env:VSS_NUGET_EXTERNAL_FEED_ENDPOINTS = '{{"endpointCredentials": [{{"endpoint":"{0}", "username":"{1}", "password":"{2}"}}]}}' -f $url, $e, $pwd
-
-                  if(-not (Get-PSRepository | ? Name -eq $n)) { Register-PSRepository -Credential $creds -Name $n -SourceLocation $url -PublishLocation $url -InstallationPolicy Trusted }
+                  # $Env:NUGET_CREDENTIALPROVIDER_SESSIONTOKENCACHE_ENABLED = 'true'
+                  # $Env:VSS_NUGET_EXTERNAL_FEED_ENDPOINTS = '{{"endpointCredentials": [{{"endpoint":"{0}", "username":"{1}", "password":"{2}"}}]}}' -f $url, $e, $pwd
 
                   Install-Module -Name "BurpSuite" -Repository $n -Credential $creds -Force -Scope CurrentUser
               pwsh: true
@@ -314,8 +329,7 @@ stages:
     and
     (
       succeeded(),
-      eq(variables['Build.SourceBranchName'], 'master'),
-      eq(${{ parameters.publishToGallery }}, true)
+      eq(variables['Build.SourceBranchName'], 'master')
     )
   jobs:
   - deployment: Release
@@ -327,6 +341,41 @@ stages:
       runOnce:
         deploy:
           steps:
+          - task: NuGetAuthenticate@0
+
+          - task: PowerShell@2
+            displayName: 'Register Private Repository'
+            inputs:
+              targetType: 'inline'
+              script: |
+                $n = 'BurpSuite'
+                $url = "$(ARTIFACTS_URL)"
+                if(-not (Get-PSRepository | Where-Object Name -eq $n)) {
+                    Register-PSRepository -Name $n -SourceLocation $url -InstallationPolicy Trusted -Verbose
+                }
+                Get-PSRepository
+              pwsh: true
+
+          - task: PowerShell@2
+            displayName: 'Install BurpSuite'
+            inputs:
+              targetType: 'inline'
+              script: |
+                  $n = "BurpSuite"
+                  $e = "$(ARTIFACTS_EMAIL)"
+                  $url = "$(ARTIFACTS_URL)"
+                  $pwd = ConvertTo-SecureString $Env:ARTIFACTS_PAT -AsPlainText -Force
+                  $creds = New-Object PSCredential($e, $pwd)
+
+                  # LINK: https://github.com/Microsoft/artifacts-credprovider
+                  # $Env:NUGET_CREDENTIALPROVIDER_SESSIONTOKENCACHE_ENABLED = 'true'
+                  # $Env:VSS_NUGET_EXTERNAL_FEED_ENDPOINTS = '{{"endpointCredentials": [{{"endpoint":"{0}", "username":"{1}", "password":"{2}"}}]}}' -f $url, $e, $pwd
+
+                  Install-Module -Name "BurpSuite" -Repository $n -Credential $creds -Force -Scope CurrentUser
+              pwsh: true
+            env:
+              ARTIFACTS_PAT: $(ARTIFACTS_PAT)
+
           - task: PowerShell@2
             displayName: 'Set Module Path'
             inputs:
@@ -382,6 +431,7 @@ stages:
               packagesToPush: '$(Pipeline.Workspace)/module/dist/*.nupkg'
               nuGetFeedType: external
               publishFeedCredentials: 'PowerShellGallery'
+            condition: eq(${{ parameters.publishToGallery }}, true)
 
           - task: GithubRelease@0
             displayName: 'Create GitHub Release'

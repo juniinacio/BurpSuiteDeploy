@@ -11,13 +11,21 @@
                 "https://sub.example.com/wp-admin/"
             ]
         },
-        "applicationLogins": [
-            {
-                "label": "admin",
-                "username": "administrator",
-                "password": "chamgeme"
-            }
-        ],
+        "applicationLogins": {
+            "loginCredentials": [
+                {
+                    "label": "admin",
+                    "username": "administrator",
+                    "password": "chamgeme"
+                }
+            ],
+            "recordedLogins": [
+                {
+                    "label": "admin",
+                    "script": "{}"
+                }
+            ]
+        },
         "emailRecipients": [
             {
                 "email": "foo@example.com"

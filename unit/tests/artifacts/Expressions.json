@@ -17,13 +17,21 @@
                 "email": "foo@example.com"
             }
         ],
-        "applicationLogins": [
-            {
-                "label": "admin",
-                "username": "administrator",
-                "password": "chamgeme"
-            }
-        ],
+        "applicationLogins": {
+            "loginCredentials": [
+                {
+                    "label": "admin",
+                    "username": "administrator",
+                    "password": "chamgeme"
+                }
+            ],
+            "recordedLogins": [
+                {
+                    "label": "admin",
+                    "script": "{}"
+                }
+            ]
+        },
         "scanConfigurationIds": [
             "[(reference('BurpSuite/ScanConfigurations/Example - Large Scan Configuration')).id]"
         ]

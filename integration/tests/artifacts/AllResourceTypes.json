@@ -30,13 +30,15 @@
                                 "https://sub.example.com/wp-admin"
                             ]
                         },
-                        "applicationLogins": [
-                            {
-                                "label": "admin",
-                                "username": "administrator",
-                                "password": "chamgeme"
-                            }
-                        ],
+                        "applicationLogins": {
+                            "loginCredentials": [
+                                {
+                                    "label": "admin",
+                                    "username": "administrator",
+                                    "password": "chamgeme"
+                                }
+                            ]
+                        },
                         "emailRecipients": [
                             {
                                 "email": "foo@example.com"
@@ -77,13 +79,15 @@
                         "https://www.example.com/wp-admin/"
                     ]
                 },
-                "applicationLogins": [
-                    {
-                        "label": "admin",
-                        "username": "administrator",
-                        "password": "chamgeme"
-                    }
-                ],
+                "applicationLogins": {
+                    "loginCredentials": [
+                        {
+                            "label": "admin",
+                            "username": "administrator",
+                            "password": "chamgeme"
+                        }
+                    ]
+                },
                 "emailRecipients": [
                     {
                         "email": "foo@example.com"
