@@ -325,17 +325,17 @@ stages:
 
 - stage: PSGallery_Stage
   displayName: PowerShell Gallery
-  dependsOn: Build_Stage
+  dependsOn: Testing_Stage
   variables:
     ARTIFACTS_URL: $(ArtifactsUrl)
     ARTIFACTS_EMAIL: $(ArtifactsEmail)
     ARTIFACTS_PAT: $(ArtifactsPAT)
-  condition: |
-    and
-    (
-      succeeded(),
-      eq(variables['Build.SourceBranchName'], 'master')
-    )
+  # condition: |
+  #   and
+  #   (
+  #     succeeded(),
+  #     eq(variables['Build.SourceBranchName'], 'master')
+  #   )
   jobs:
   - deployment: Release
     displayName: PowerShell Gallery / GitHub Release
