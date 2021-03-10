@@ -184,105 +184,105 @@ stages:
       runOnce:
         deploy:
           steps:
-            - task: NuGetAuthenticate@0
+          - task: NuGetAuthenticate@0
 
-            - task: PowerShell@2
-              displayName: 'Register Private Repository'
-              inputs:
-                targetType: 'inline'
-                script: |
-                  $n = 'BurpSuite'
+          - task: PowerShell@2
+            displayName: 'Register Private Repository'
+            inputs:
+              targetType: 'inline'
+              script: |
+                $n = 'BurpSuite'
+                $url = "$(ARTIFACTS_URL)"
+                if(-not (Get-PSRepository | Where-Object Name -eq $n)) {
+                    Register-PSRepository -Name $n -SourceLocation $url -InstallationPolicy Trusted -Verbose
+                }
+                Get-PSRepository
+              pwsh: true
+
+          - task: PowerShell@2
+            displayName: 'Install BurpSuite'
+            inputs:
+              targetType: 'inline'
+              script: |
+                  $n = "BurpSuite"
+                  $e = "$(ARTIFACTS_EMAIL)"
                   $url = "$(ARTIFACTS_URL)"
-                  if(-not (Get-PSRepository | Where-Object Name -eq $n)) {
-                      Register-PSRepository -Name $n -SourceLocation $url -InstallationPolicy Trusted -Verbose
-                  }
-                  Get-PSRepository
-                pwsh: true
+                  $pwd = ConvertTo-SecureString $Env:ARTIFACTS_PAT -AsPlainText -Force
+                  $creds = New-Object PSCredential($e, $pwd)
 
-            - task: PowerShell@2
-              displayName: 'Install BurpSuite'
-              inputs:
-                targetType: 'inline'
-                script: |
-                    $n = "BurpSuite"
-                    $e = "$(ARTIFACTS_EMAIL)"
-                    $url = "$(ARTIFACTS_URL)"
-                    $pwd = ConvertTo-SecureString $Env:ARTIFACTS_PAT -AsPlainText -Force
-                    $creds = New-Object PSCredential($e, $pwd)
+                  # LINK: https://github.com/Microsoft/artifacts-credprovider
+                  # $Env:NUGET_CREDENTIALPROVIDER_SESSIONTOKENCACHE_ENABLED = 'true'
+                  # $Env:VSS_NUGET_EXTERNAL_FEED_ENDPOINTS = '{{"endpointCredentials": [{{"endpoint":"{0}", "username":"{1}", "password":"{2}"}}]}}' -f $url, $e, $pwd
 
-                    # LINK: https://github.com/Microsoft/artifacts-credprovider
-                    # $Env:NUGET_CREDENTIALPROVIDER_SESSIONTOKENCACHE_ENABLED = 'true'
-                    # $Env:VSS_NUGET_EXTERNAL_FEED_ENDPOINTS = '{{"endpointCredentials": [{{"endpoint":"{0}", "username":"{1}", "password":"{2}"}}]}}' -f $url, $e, $pwd
+                  Install-Module -Name "BurpSuite" -Repository $n -Credential $creds -Force -Scope CurrentUser
+              pwsh: true
+            env:
+              ARTIFACTS_PAT: $(ARTIFACTS_PAT)
 
-                    Install-Module -Name "BurpSuite" -Repository $n -Credential $creds -Force -Scope CurrentUser
-                pwsh: true
-              env:
-                ARTIFACTS_PAT: $(ARTIFACTS_PAT)
+          - task: PowerShell@2
+            displayName: 'Set Pipeline Variables'
+            inputs:
+              targetType: 'inline'
+              script: |
+                $outputModVerDir = Split-Path -Path (Resolve-Path -Path "$(Pipeline.Workspace)/module/$(ModuleName)/*/*.psd1")
+                Write-Host  "##vso[task.setvariable variable=outputModVerDir]$outputModVerDir"
+              pwsh: true
 
-            - task: PowerShell@2
-              displayName: 'Set Pipeline Variables'
-              inputs:
-                targetType: 'inline'
-                script: |
-                  $outputModVerDir = Split-Path -Path (Resolve-Path -Path "$(Pipeline.Workspace)/module/$(ModuleName)/*/*.psd1")
-                  Write-Host  "##vso[task.setvariable variable=outputModVerDir]$outputModVerDir"
-                pwsh: true
+          - task: NuGetToolInstaller@0
+            displayName: 'Install NuGet 5.2.0'
+            inputs:
+              versionSpec: 5.2.0
 
-            - task: NuGetToolInstaller@0
-              displayName: 'Install NuGet 5.2.0'
-              inputs:
-                versionSpec: 5.2.0
+          # - task: PowerShell@2
+          #   displayName: 'Install Module Dependencies'
+          #   inputs:
+          #     targetType: 'inline'
+          #     script: |
+          #       # Load the psd1 file so you can read the required modules and install them
+          #       $manifest = Import-PowerShellDataFile $env:OUTPUTMODVERDIR/$(ModuleName).psd1
 
-            # - task: PowerShell@2
-            #   displayName: 'Install Module Dependencies'
-            #   inputs:
-            #     targetType: 'inline'
-            #     script: |
-            #       # Load the psd1 file so you can read the required modules and install them
-            #       $manifest = Import-PowerShellDataFile $env:OUTPUTMODVERDIR/$(ModuleName).psd1
+          #       # Install each module
+          #       $manifest.RequiredModules | ForEach-Object { Install-Module -Name $_ -Repository PSGallery -F -Scope CurrentUser }
+          #     workingDirectory: '$(Pipeline.Workspace)/module'
 
-            #       # Install each module
-            #       $manifest.RequiredModules | ForEach-Object { Install-Module -Name $_ -Repository PSGallery -F -Scope CurrentUser }
-            #     workingDirectory: '$(Pipeline.Workspace)/module'
+          - task: PowerShell@2
+            displayName: 'Compute Version Number'
+            inputs:
+              targetType: 'inline'
+              script: |
+                # Load the psd1 file so you can read the version
+                $manifest = Import-PowerShellDataFile $env:OUTPUTMODVERDIR/$(ModuleName).psd1
+                Write-Host "##vso[task.setvariable variable=PACKAGE_VERSION;isOutput=false]$($manifest.ModuleVersion).$(Build.BuildId)"
+              workingDirectory: '$(Pipeline.Workspace)/module'
+              pwsh: true
 
-            - task: PowerShell@2
-              displayName: 'Compute Version Number'
-              inputs:
-                targetType: 'inline'
-                script: |
-                  # Load the psd1 file so you can read the version
-                  $manifest = Import-PowerShellDataFile $env:OUTPUTMODVERDIR/$(ModuleName).psd1
-                  Write-Host "##vso[task.setvariable variable=PACKAGE_VERSION;isOutput=false]$($manifest.ModuleVersion).$(Build.BuildId)"
-                workingDirectory: '$(Pipeline.Workspace)/module'
-                pwsh: true
+          - task: PowerShell@2
+            displayName: 'Create NuSpec from PSD1'
+            inputs:
+              targetType: 'inline'
+              script: |
+                Install-Module -Name Trackyon.Nuget -Scope CurrentUser -Repository PSGallery -Force
+                ConvertTo-NuSpec -Path $env:OUTPUTMODVERDIR/$(ModuleName).psd1
+              workingDirectory: '$(Pipeline.Workspace)/module'
+              pwsh: true
 
-            - task: PowerShell@2
-              displayName: 'Create NuSpec from PSD1'
-              inputs:
-                targetType: 'inline'
-                script: |
-                  Install-Module -Name Trackyon.Nuget -Scope CurrentUser -Repository PSGallery -Force
-                  ConvertTo-NuSpec -Path $env:OUTPUTMODVERDIR/$(ModuleName).psd1
-                workingDirectory: '$(Pipeline.Workspace)/module'
-                pwsh: true
+          - task: NuGetCommand@2
+            displayName: 'Pack Module $(ModuleName)'
+            inputs:
+              command: pack
+              packagesToPack: '$(outputModVerDir)/$(ModuleName).nuspec'
+              packDestination: '$(Pipeline.Workspace)/module/dist'
+              versioningScheme: byEnvVar
+              versionEnvVar: 'PACKAGE_VERSION'
 
-            - task: NuGetCommand@2
-              displayName: 'Pack Module $(ModuleName)'
-              inputs:
-                command: pack
-                packagesToPack: '$(outputModVerDir)/$(ModuleName).nuspec'
-                packDestination: '$(Pipeline.Workspace)/module/dist'
-                versioningScheme: byEnvVar
-                versionEnvVar: 'PACKAGE_VERSION'
-
-            - task: NuGetCommand@2
-              displayName: 'Push Module $(ModuleName)'
-              inputs:
-                command: push
-                packagesToPush: '$(Pipeline.Workspace)/module/dist/*.nupkg'
-                nuGetFeedType: 'internal'
-                publishVstsFeed: '94a7dd00-be62-477a-8e5a-0abc01d3f9c8/5ed74c16-db4e-4e0b-9af0-3af6937d0d49'
-                allowPackageConflicts: true
+          - task: NuGetCommand@2
+            displayName: 'Push Module $(ModuleName)'
+            inputs:
+              command: push
+              packagesToPush: '$(Pipeline.Workspace)/module/dist/*.nupkg'
+              nuGetFeedType: 'internal'
+              publishVstsFeed: '94a7dd00-be62-477a-8e5a-0abc01d3f9c8/5ed74c16-db4e-4e0b-9af0-3af6937d0d49'
+              allowPackageConflicts: true
 
 - stage: Testing_Stage
   displayName: Testing
@@ -342,40 +342,40 @@ stages:
       runOnce:
         deploy:
           steps:
-            - task: NuGetAuthenticate@0
+          - task: NuGetAuthenticate@0
 
-            - task: PowerShell@2
-              displayName: 'Register Private Repository'
-              inputs:
-                targetType: 'inline'
-                script: |
-                  $n = 'BurpSuite'
+          - task: PowerShell@2
+            displayName: 'Register Private Repository'
+            inputs:
+              targetType: 'inline'
+              script: |
+                $n = 'BurpSuite'
+                $url = "$(ARTIFACTS_URL)"
+                if(-not (Get-PSRepository | Where-Object Name -eq $n)) {
+                    Register-PSRepository -Name $n -SourceLocation $url -InstallationPolicy Trusted -Verbose
+                }
+                Get-PSRepository
+              pwsh: true
+
+          - task: PowerShell@2
+            displayName: 'Install BurpSuite'
+            inputs:
+              targetType: 'inline'
+              script: |
+                  $n = "BurpSuite"
+                  $e = "$(ARTIFACTS_EMAIL)"
                   $url = "$(ARTIFACTS_URL)"
-                  if(-not (Get-PSRepository | Where-Object Name -eq $n)) {
-                      Register-PSRepository -Name $n -SourceLocation $url -InstallationPolicy Trusted -Verbose
-                  }
-                  Get-PSRepository
-                pwsh: true
+                  $pwd = ConvertTo-SecureString $Env:ARTIFACTS_PAT -AsPlainText -Force
+                  $creds = New-Object PSCredential($e, $pwd)
 
-            - task: PowerShell@2
-              displayName: 'Install BurpSuite'
-              inputs:
-                targetType: 'inline'
-                script: |
-                    $n = "BurpSuite"
-                    $e = "$(ARTIFACTS_EMAIL)"
-                    $url = "$(ARTIFACTS_URL)"
-                    $pwd = ConvertTo-SecureString $Env:ARTIFACTS_PAT -AsPlainText -Force
-                    $creds = New-Object PSCredential($e, $pwd)
+                  # LINK: https://github.com/Microsoft/artifacts-credprovider
+                  # $Env:NUGET_CREDENTIALPROVIDER_SESSIONTOKENCACHE_ENABLED = 'true'
+                  # $Env:VSS_NUGET_EXTERNAL_FEED_ENDPOINTS = '{{"endpointCredentials": [{{"endpoint":"{0}", "username":"{1}", "password":"{2}"}}]}}' -f $url, $e, $pwd
 
-                    # LINK: https://github.com/Microsoft/artifacts-credprovider
-                    # $Env:NUGET_CREDENTIALPROVIDER_SESSIONTOKENCACHE_ENABLED = 'true'
-                    # $Env:VSS_NUGET_EXTERNAL_FEED_ENDPOINTS = '{{"endpointCredentials": [{{"endpoint":"{0}", "username":"{1}", "password":"{2}"}}]}}' -f $url, $e, $pwd
-
-                    Install-Module -Name "BurpSuite" -Repository $n -Credential $creds -Force -Scope CurrentUser
-                pwsh: true
-              env:
-                ARTIFACTS_PAT: $(ARTIFACTS_PAT)
+                  Install-Module -Name "BurpSuite" -Repository $n -Credential $creds -Force -Scope CurrentUser
+              pwsh: true
+            env:
+              ARTIFACTS_PAT: $(ARTIFACTS_PAT)
 
           - task: PowerShell@2
             displayName: 'Set Module Path'
