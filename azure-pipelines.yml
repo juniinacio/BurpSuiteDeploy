@@ -18,11 +18,9 @@ trigger:
     - master
   paths:
     include:
-    - .azure-pipelines/*
     - src/*
     - integration/*
     - unit/*
-    - azure-pipelines.yml
 
 resources:
 - repo: self
