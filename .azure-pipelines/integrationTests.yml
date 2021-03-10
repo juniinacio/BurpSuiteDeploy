@@ -44,6 +44,17 @@ jobs:
                 pwsh: ${{ parameters.pwsh }}
 
             - task: PowerShell@2
+              displayName: 'Update Nuget & PowerShellGet'
+              inputs:
+                targetType: 'inline'
+                script: |
+                  [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+                  Get-PackageProvider -Name Nuget -ForceBootstrap | Out-Null
+                  Install-Module PowerShellGet -MinimumVersion 2.2.4 -SkipPublisherCheck
+                pwsh: ${{ parameters.pwsh }}
+              env:
+
+            - task: PowerShell@2
               displayName: 'Register Private Repository'
               inputs:
                 targetType: 'inline'
@@ -53,10 +64,6 @@ jobs:
                   $url = "$(ARTIFACTS_URL)"
                   $pwd = ConvertTo-SecureString $Env:ARTIFACTS_PAT -AsPlainText -Force
                   $creds = New-Object PSCredential($e, $pwd)
-
-                  [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
-                  Get-PackageProvider -Name Nuget -ForceBootstrap | Out-Null
-                  Install-Module PowerShellGet -MinimumVersion 2.2.4 -SkipPublisherCheck
 
                   # LINK: https://github.com/Microsoft/artifacts-credprovider
                   $Env:NUGET_CREDENTIALPROVIDER_SESSIONTOKENCACHE_ENABLED = 'true'
