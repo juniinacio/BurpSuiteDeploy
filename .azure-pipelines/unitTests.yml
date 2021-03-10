@@ -24,6 +24,8 @@ steps:
         $pwd = ConvertTo-SecureString $Env:ARTIFACTS_PAT -AsPlainText -Force
         $creds = New-Object PSCredential($e, $pwd)
 
+        [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+
         # LINK: https://github.com/Microsoft/artifacts-credprovider
         $Env:NUGET_CREDENTIALPROVIDER_SESSIONTOKENCACHE_ENABLED = 'true'
         $Env:VSS_NUGET_EXTERNAL_FEED_ENDPOINTS = '{{"endpointCredentials": [{{"endpoint":"{0}", "username":"{1}", "password":"{2}"}}]}}' -f $url, $e, $pwd
