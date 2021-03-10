@@ -3,15 +3,15 @@ parameters:
   pwsh: false
 
 steps:
-- task: PowerShell@2
-  displayName: 'Update Nuget & PowerShellGet'
-  inputs:
-    targetType: 'inline'
-    script: |
-      # [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
-      Get-PackageProvider -Name Nuget -ForceBootstrap | Out-Null
-      Install-Module PowerShellGet -MinimumVersion 2.2.4 -SkipPublisherCheck
-    pwsh: ${{ parameters.pwsh }}
+# - task: PowerShell@2
+#   displayName: 'Update Nuget & PowerShellGet'
+#   inputs:
+#     targetType: 'inline'
+#     script: |
+#       # [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+#       Get-PackageProvider -Name Nuget -ForceBootstrap | Out-Null
+#       Install-Module PowerShellGet -MinimumVersion 2.2.4 -SkipPublisherCheck
+#     pwsh: ${{ parameters.pwsh }}
 #   condition: eq('${{ parameters.pwsh }}', false)
 
 # - task: PowerShell@2
