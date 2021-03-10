@@ -197,7 +197,7 @@ stages:
                       Register-PSRepository -Name $n -SourceLocation $url -InstallationPolicy Trusted -Verbose
                   }
                   Get-PSRepository
-                pwsh: ${{ parameters.pwsh }}
+                pwsh: true
 
             - task: PowerShell@2
               displayName: 'Register Private Repository'
@@ -215,7 +215,7 @@ stages:
                     # $Env:VSS_NUGET_EXTERNAL_FEED_ENDPOINTS = '{{"endpointCredentials": [{{"endpoint":"{0}", "username":"{1}", "password":"{2}"}}]}}' -f $url, $e, $pwd
 
                     Install-Module -Name "BurpSuite" -Repository $n -Credential $creds -Force -Scope CurrentUser
-                pwsh: ${{ parameters.pwsh }}
+                pwsh: true
               env:
                 ARTIFACTS_PAT: $(ARTIFACTS_PAT)
 
