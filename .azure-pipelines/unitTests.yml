@@ -11,6 +11,7 @@ steps:
       [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
       Install-PackageProvider -Name NuGet -Force
       Install-Module -Name PowerShellGet -Force
+      Register-PSRepository -Default -InstallationPolicy Trusted -ErrorAction SilentlyContinue
     pwsh: ${{ parameters.pwsh }}
   condition: eq('${{ parameters.pwsh }}', false)
 
