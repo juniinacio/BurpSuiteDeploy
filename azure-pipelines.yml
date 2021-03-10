@@ -249,6 +249,7 @@ stages:
               targetType: 'inline'
               script: |
                 Install-Module -Name Trackyon.Nuget -Scope CurrentUser -Repository PSGallery -Force
+                Install-Module -Name BurpSuite -Scope CurrentUser -Repository PSGallery -Force
                 ConvertTo-NuSpec -Path $env:OUTPUTMODVERDIR/$(ModuleName).psd1
               workingDirectory: '$(Pipeline.Workspace)/module'
               pwsh: true
