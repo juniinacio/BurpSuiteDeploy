@@ -2,7 +2,7 @@ parameters:
   - name: publishToGallery
     displayName: Set to true to publish the module to PSGallery
     type: boolean
-    default: true
+    default: false
 
 name: $(Build.BuildID)
 
@@ -329,8 +329,7 @@ stages:
     and
     (
       succeeded(),
-      eq(variables['Build.SourceBranchName'], 'master'),
-      eq(${{ parameters.publishToGallery }}, true)
+      eq(variables['Build.SourceBranchName'], 'master')
     )
   jobs:
   - deployment: Release
@@ -432,6 +431,7 @@ stages:
               packagesToPush: '$(Pipeline.Workspace)/module/dist/*.nupkg'
               nuGetFeedType: external
               publishFeedCredentials: 'PowerShellGallery'
+            condition: eq(${{ parameters.publishToGallery }}, true)
 
           - task: GithubRelease@0
             displayName: 'Create GitHub Release'
