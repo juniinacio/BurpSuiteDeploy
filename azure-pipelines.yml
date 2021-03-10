@@ -391,6 +391,7 @@ stages:
               script: |
                 $outputModVerDir = Split-Path -Path (Resolve-Path -Path "$(Pipeline.Workspace)/module/$(ModuleName)/*/*.psd1")
                 Write-Host  "##vso[task.setvariable variable=outputModVerDir]$outputModVerDir"
+              pwsh: true
 
           - task: NuGetToolInstaller@0
             displayName: 'Install NuGet 5.2.0'
@@ -422,6 +423,7 @@ stages:
 
                 Write-Host "##vso[task.setvariable variable=PACKAGE_VERSION;isOutput=false]$($manifest.ModuleVersion)"
               workingDirectory: '$(Pipeline.Workspace)/module'
+              pwsh: true
 
           - task: NuGetCommand@2
             displayName: 'Pack Module $(ModuleName)'
