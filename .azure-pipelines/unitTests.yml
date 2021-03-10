@@ -12,6 +12,7 @@ steps:
       Get-PackageProvider -Name Nuget -ForceBootstrap | Out-Null
       Install-Module PowerShellGet -MinimumVersion 2.2.4 -SkipPublisherCheck
     pwsh: ${{ parameters.pwsh }}
+  condition: eq('${{ parameters.pwsh }}', false)
 
 - task: PowerShell@2
   displayName: 'Register Private Repository'
