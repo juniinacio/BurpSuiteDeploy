@@ -1,6 +1,10 @@
 parameters:
   - name: publishToGallery
-    displayName: Set to true to publish the module to PSGallery
+    displayName: Publish the module to PSGallery
+    type: boolean
+    default: false
+  - name: publishToGitHub
+    displayName: Publish the module to GitHub
     type: boolean
     default: false
 
@@ -334,7 +338,8 @@ stages:
     and
     (
       succeeded(),
-      eq(variables['Build.SourceBranchName'], 'master')
+      eq(variables['Build.SourceBranchName'], 'master'),
+      or(eq(${{ parameters.publishToGallery }}, true), eq(${{ parameters.publishToGithub }}, true))
     )
   jobs:
   - deployment: Release
@@ -452,3 +457,4 @@ stages:
               compareWith: 'lastFullRelease'
               assets: |
                 $(Pipeline.Workspace)/module/dist/*.nupkg
+            condition: eq(${{ parameters.publishToGithub }}, true)
