@@ -51,7 +51,7 @@
     # ProcessorArchitecture = ''
 
     # Modules that must be imported into the global environment prior to importing this module
-    RequiredModules = @('BurpSuite')
+    RequiredModules   = @( @{ModuleName = 'BurpSuite'; ModuleVersion = '1.3.1'; GUID = '8a3d6a8e-0da7-4b14-90c5-631470efde63' } )
 
     # Assemblies that must be loaded prior to importing this module
     # RequiredAssemblies = @()
@@ -99,19 +99,28 @@
         PSData = @{
 
             # Tags applied to this module. These help with module discovery in online galleries.
-            # Tags = @()
+            Tags                       = @('BurpSuite', 'PowerShell')
 
             # A URL to the license for this module.
-            # LicenseUri = ''
+            LicenseUri                 = 'https://github.com/juniinacio/BurpSuiteDeploy/blob/master/LICENSE'
 
             # A URL to the main website for this project.
-            # ProjectUri = ''
+            ProjectUri                 = 'https://github.com/juniinacio/BurpSuiteDeploy'
 
             # A URL to an icon representing this module.
             # IconUri = ''
 
             # ReleaseNotes of this module
             # ReleaseNotes = ''
+
+            # Prerelease string of this module
+            # Prerelease = ''
+
+            # Flag to indicate whether the module requires explicit user acceptance for install/update/save
+            # RequireLicenseAcceptance = $false
+
+            # External dependent modules of this module
+            ExternalModuleDependencies = @('BurpSuite')
 
         } # End of PSData hashtable
 
