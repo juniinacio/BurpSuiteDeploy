@@ -76,7 +76,7 @@ BurpSuiteDeploy supports creating the following resources:
 |  Scan Configuration  | BurpSuite/ScanConfigurations | This resource type creates scan configurations. |
 |  Schedule Item       | BurpSuite/ScheduleItems | This resource type creates schedule items. |
 
-For example JSON templates see [examples](examples).
+For example JSON templates see [examples](examples) or [unit tests artifacts](unit\tests\artifacts) (as soon as I get more time on my hands I will write a proper documentation about this module, everyone is also welcome to contribute with BurpSuiteDeploy).
 
 To start deploying your configuration templates you will first need to create a API key in the BurpSuite Enterprise UI. After getting the API key you can trigger a deployment using the `Invoke-BurpSuiteDeploy` command.
 
