@@ -448,15 +448,15 @@ stages:
               publishFeedCredentials: 'PowerShellGallery'
             condition: eq(${{ parameters.publishToGallery }}, true)
 
-          - task: GithubRelease@0
+          - task: GitHubRelease@1
             displayName: 'Create GitHub Release'
             inputs:
               gitHubConnection: GitHub
               repositoryName: juniinacio/$(ModuleName)
-              tagSource: manual
+              tagSource: userSpecifiedTag
               tag: v$(PACKAGE_VERSION)
               addChangeLog: true
-              compareWith: 'lastFullRelease'
+              changeLogCompareToRelease: 'lastFullRelease'
               assets: |
                 $(Pipeline.Workspace)/module/dist/*.nupkg
             condition: eq(${{ parameters.publishToGithub }}, true)
