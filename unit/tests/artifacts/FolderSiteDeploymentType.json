@@ -3,13 +3,17 @@
     "ResourceType": "BurpSuite/Folders/Sites",
     "Name": "sub.example.com",
     "Properties": {
-        "scope": {
-            "includedUrls": [
+        "scopeV2": {
+            "startUrls": [
                 "https://sub.example.com"
             ],
-            "excludedUrls": [
+            "inScopeUrlPrefixes": [
+                "https://sub.example.com"
+            ],
+            "outOfScopeUrlPrefixes": [
                 "https://sub.example.com/wp-admin/"
-            ]
+            ],
+            "protocolOptions": "USE_HTTP_AND_HTTPS"
         },
         "applicationLogins": {
             "loginCredentials": [

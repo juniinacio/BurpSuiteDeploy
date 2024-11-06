@@ -51,7 +51,7 @@
     # ProcessorArchitecture = ''
 
     # Modules that must be imported into the global environment prior to importing this module
-    RequiredModules   = @( @{ModuleName = 'BurpSuite'; ModuleVersion = '1.3.1'; GUID = '8a3d6a8e-0da7-4b14-90c5-631470efde63' } )
+    RequiredModules   = @( @{ModuleName = 'BurpSuite'; ModuleVersion = '1.4.0'; GUID = '8a3d6a8e-0da7-4b14-90c5-631470efde63' } )
 
     # Assemblies that must be loaded prior to importing this module
     # RequiredAssemblies = @()
