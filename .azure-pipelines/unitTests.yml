@@ -3,7 +3,7 @@ parameters:
   pwsh: false
 
 steps:
-- task: NuGetAuthenticate@0
+- task: NuGetAuthenticate@1
 
 - task: PowerShell@2
   displayName: 'Register Private Repository'

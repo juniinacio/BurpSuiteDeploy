@@ -43,7 +43,7 @@ jobs:
                   Write-Host  "##vso[task.setvariable variable=outputModVerDir]$outputModVerDir"
                 pwsh: ${{ parameters.pwsh }}
 
-            - task: NuGetAuthenticate@0
+            - task: NuGetAuthenticate@1
 
             - task: PowerShell@2
               displayName: 'Register Private Repository'
