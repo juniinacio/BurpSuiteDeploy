@@ -21,8 +21,12 @@ function _cloneObject {
 
     $tempFile = New-TemporaryFile
 
-    Export-Clixml -LiteralPath $tempFile -InputObject $InputObject
-    Import-Clixml -LiteralPath $tempFile
+    Export-Clixml -Path $tempFile.FullName -InputObject $InputObject
+    $outputObject = Import-Clixml -Path $tempFile.FullName
+
+    Remove-Item -Path $tempFile.FullName -Force
+
+    $outputObject
 }
 
 function _convertToHashtable {
