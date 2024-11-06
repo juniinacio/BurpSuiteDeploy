@@ -26,7 +26,7 @@ Describe 'Invoke-BurpSuiteDeploy' -Tag 'CD' {
             # Arrange
 
             # Act
-            $assert = Invoke-BurpSuiteDeploy -TemplateFile $testArtifacts\AllResourceTypes.json -Uri $BURPSUITE_URL  -APIkey $BURPSUITE_APIKEY
+            $assert = Invoke-BurpSuiteDeploy -TemplateFile $testArtifacts\AllResourceTypes.json -Uri $BURPSUITE_URL  -APIkey $BURPSUITE_APIKEY -Verbose
 
             # Assert
             @($assert).ProvisioningState -contains 'Error' | Should -Be $false
