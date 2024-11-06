@@ -329,7 +329,7 @@ stages:
 
 - stage: PSGallery_Stage
   displayName: PowerShell Gallery
-  dependsOn: Build_Stage
+  dependsOn: Testing_Stage
   variables:
     ARTIFACTS_URL: $(ArtifactsUrl)
     ARTIFACTS_EMAIL: $(ArtifactsEmail)
