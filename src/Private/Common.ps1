@@ -6,14 +6,23 @@ function _cloneObject {
         [object] $InputObject
     )
 
-    $memoryStream = new-object IO.MemoryStream
+    #
+    # NOTE: Use Export-Clixml/Import-Clixml instead of BinaryFormatter
+    # https://learn.microsoft.com/en-us/dotnet/standard/serialization/binaryformatter-security-guide#binaryformatter-security-vulnerabilities
+    #
+    # $memoryStream = new-object IO.MemoryStream
 
-    $binaryFormatter = new-object Runtime.Serialization.Formatters.Binary.BinaryFormatter
-    $binaryFormatter.Serialize($memoryStream, $InputObject)
+    # $binaryFormatter = new-object Runtime.Serialization.Formatters.Binary.BinaryFormatter
+    # $binaryFormatter.Serialize($memoryStream, $InputObject)
 
-    $memoryStream.Position = 0
+    # $memoryStream.Position = 0
 
-    $binaryFormatter.Deserialize($memoryStream)
+    # $binaryFormatter.Deserialize($memoryStream)
+
+    $tempFile = New-TemporaryFile
+
+    Export-Clixml -LiteralPath $tempFile -InputObject $InputObject
+    Import-Clixml -LiteralPath $tempFile
 }
 
 function _convertToHashtable {
@@ -56,13 +65,13 @@ function _sortDeployment {
 
     foreach ($resource in $Resources) {
         if ($resource.dependsOn) {
-            if(-not $order.ContainsKey($resource.ResourceId)) {
+            if (-not $order.ContainsKey($resource.ResourceId)) {
                 $order.add($resource.ResourceId, $resource.dependsOn)
             }
         }
     }
 
-    if($order.Keys.Count -gt 0) {
+    if ($order.Keys.Count -gt 0) {
         $deployOrder = _sortTopologically $order
         _sortWithCustomList -InputObject $Resources -Property ResourceId -CustomList $deployOrder
     } else {
@@ -151,11 +160,11 @@ function _sortTopologically {
 function _sortWithCustomList {
     [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSReviewUnusedParameter", "")]
     Param (
-        [parameter(ValueFromPipeline=$true)]
+        [parameter(ValueFromPipeline = $true)]
         [PSObject]
         $InputObject,
 
-        [parameter(Position=1)]
+        [parameter(Position = 1)]
         [String]
         $Property,
 
