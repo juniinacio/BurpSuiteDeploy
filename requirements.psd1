@@ -21,6 +21,6 @@
         Version = '0.4.0'
     }
     'BurpSuite'  = @{
-        Version = '1.3.0'
+        Version = '1.4.0'
     }
 }

@@ -3,7 +3,7 @@ parameters:
   pwsh: false
 
 steps:
-- task: NuGetAuthenticate@0
+- task: NuGetAuthenticate@1
 
 - task: PowerShell@2
   displayName: 'Register Private Repository'
@@ -57,7 +57,7 @@ steps:
       Write-Host  "##vso[task.setvariable variable=outputModVerDir]$outputModVerDir"
     pwsh: ${{ parameters.pwsh }}
 
-- task: PublishCodeCoverageResults@1
+- task: PublishCodeCoverageResults@2
   displayName: 'Publish Code Coverage'
   inputs:
     summaryFileLocation: '**/$(ModuleName)-Coverage.xml'

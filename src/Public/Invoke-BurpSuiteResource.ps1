@@ -42,7 +42,7 @@ function Invoke-BurpSuiteResource {
                             $parameters = @{
                                 ParentId             = "0"
                                 Name                 = $InputObject.Name
-                                Scope                = $InputObject.Properties.scope
+                                ScopeV2              = $InputObject.Properties.scopeV2
                                 ScanConfigurationIds = $scanConfigurationIds
                             }
 
@@ -79,9 +79,19 @@ function Invoke-BurpSuiteResource {
 
                             Write-Verbose "Updating site $($InputObject.Name)`..."
 
-                            if ($null -ne ($InputObject.Properties.scope)) {
+                            if ($null -ne ($InputObject.Properties.scopeV2)) {
                                 Write-Verbose " Updating site scopes..."
-                                Update-BurpSuiteSiteScope -SiteId $resource.Id -IncludedUrls $InputObject.Properties.scope.includedUrls -ExcludedUrls $InputObject.Properties.scope.excludedUrls
+
+                                $parameters = @{
+                                    StartUrls             = @($InputObject.Properties.scopeV2.startUrls)
+                                    InScopeUrlPrefixes    = @($InputObject.Properties.scopeV2.inScopeUrlPrefixes)
+                                    OutOfScopeUrlPrefixes = @($InputObject.Properties.scopeV2.outOfScopeUrlPrefixes)
+                                }
+
+                                if ($null -ne ($InputObject.Properties.scopeV2.protocolOptions)) { $parameters.ProtocolOptions = $InputObject.Properties.scopeV2.protocolOptions }
+
+                                Update-BurpSuiteSiteScope -SiteId $resource.Id @parameters
+
                                 Start-Sleep -Seconds 1
                             }
 
@@ -184,7 +194,7 @@ function Invoke-BurpSuiteResource {
                                 $parameters = @{
                                     ParentId             = $parentResource.Id
                                     Name                 = $InputObject.Name
-                                    Scope                = $InputObject.Properties.scope
+                                    ScopeV2              = $InputObject.Properties.scopeV2
                                     ScanConfigurationIds = $scanConfigurationIds
                                 }
 
@@ -220,9 +230,19 @@ function Invoke-BurpSuiteResource {
                             } else {
                                 Write-Verbose "Updating site $($InputObject.Name), parent id $($parentResource.Id)`..."
 
-                                if ($null -ne ($InputObject.Properties.scope)) {
+                                if ($null -ne ($InputObject.Properties.scopeV2)) {
                                     Write-Verbose " Updating site scopes..."
-                                    Update-BurpSuiteSiteScope -SiteId $resource.Id -IncludedUrls $InputObject.Properties.scope.includedUrls -ExcludedUrls $InputObject.Properties.scope.excludedUrls
+
+                                    $parameters = @{
+                                        StartUrls             = @($InputObject.Properties.scopeV2.startUrls)
+                                        InScopeUrlPrefixes    = @($InputObject.Properties.scopeV2.inScopeUrlPrefixes)
+                                        OutOfScopeUrlPrefixes = @($InputObject.Properties.scopeV2.outOfScopeUrlPrefixes)
+                                    }
+
+                                    if ($null -ne ($InputObject.Properties.scopeV2.protocolOptions)) { $parameters.ProtocolOptions = $InputObject.Properties.scopeV2.protocolOptions }
+
+                                    Update-BurpSuiteSiteScope -SiteId $resource.Id @parameters
+
                                     Start-Sleep -Seconds 1
                                 }
 

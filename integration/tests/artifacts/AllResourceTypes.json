@@ -22,13 +22,17 @@
                         "BurpSuite/ScanConfigurations/Example - Large Scan Configuration"
                     ],
                     "properties": {
-                        "scope": {
-                            "includedUrls": [
+                        "scopeV2": {
+                            "startUrls": [
                                 "https://sub.example.com"
                             ],
-                            "excludedUrls": [
-                                "https://sub.example.com/wp-admin"
-                            ]
+                            "inScopeUrlPrefixes": [
+                                "https://sub.example.com"
+                            ],
+                            "outOfScopeUrlPrefixes": [
+                                "https://sub.example.com/wp-admin/"
+                            ],
+                            "protocolOptions": "USE_HTTP_AND_HTTPS"
                         },
                         "applicationLogins": {
                             "loginCredentials": [
@@ -71,13 +75,17 @@
             ],
             "properties": {
                 "parentId": "0",
-                "scope": {
-                    "includedUrls": [
+                "scopeV2": {
+                    "startUrls": [
                         "https://www.example.com"
                     ],
-                    "excludedUrls": [
+                    "inScopeUrlPrefixes": [
+                        "https://www.example.com"
+                    ],
+                    "outOfScopeUrlPrefixes": [
                         "https://www.example.com/wp-admin/"
-                    ]
+                    ],
+                    "protocolOptions": "USE_HTTP_AND_HTTPS"
                 },
                 "applicationLogins": {
                     "loginCredentials": [

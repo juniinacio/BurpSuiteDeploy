@@ -154,8 +154,8 @@ InModuleScope $env:BHProjectName {
                 Should -Invoke -CommandName New-BurpSuiteSite -ParameterFilter {
                     $ParentId -eq 0 `
                         -and $Name -eq $testSiteDeployment.Name `
-                        -and $Scope.IncludedUrls[0] -eq $testSiteDeployment.Properties.Scope.IncludedUrls[0] `
-                        -and $Scope.ExcludedUrls[0] -eq $testSiteDeployment.Properties.Scope.ExcludedUrls[0] `
+                        -and $ScopeV2.StartUrls[0] -eq $testSiteDeployment.Properties.scopeV2.startUrls[0] `
+                        -and $ScopeV2.OutOfScopeUrlPrefixes[0] -eq $testSiteDeployment.Properties.scopeV2.outOfScopeUrlPrefixes[0] `
                         -and $ScanConfigurationIds[0] -eq $testSiteDeployment.Properties.ScanConfigurationIds[0] `
                         -and $EmailRecipients[0].email -eq $testSiteDeployment.Properties.EmailRecipients[0].email `
                         -and $LoginCredentials[0].label -eq $testSiteDeployment.Properties.ApplicationLogins.loginCredentials[0].label `
@@ -209,7 +209,7 @@ InModuleScope $env:BHProjectName {
                     $testSiteDeployment = ConvertFrom-Json -InputObject (Get-Content -Path $testArtifacts\SiteDeploymentType.json | Out-String)
 
                     $testSite = ConvertFrom-Json -InputObject (Get-Content -Path $testArtifacts\SiteReturnType.json | Out-String)
-                    $testSite.scope = $null
+                    $testSite.scope_v2 = $null
                     $testSite.scan_configurations = $null
                     $testSite.email_recipients = $null
                     $testSite.application_logins.recorded_logins = $null
@@ -262,7 +262,7 @@ InModuleScope $env:BHProjectName {
 
                     $testSite = ConvertFrom-Json -InputObject (Get-Content -Path $testArtifacts\SiteReturnType.json | Out-String)
                     $testSite.application_logins = $null
-                    $testSite.scope = $null
+                    $testSite.scope_v2 = $null
                     $testSite.scan_configurations = $null
                     $testSite.email_recipients = $null
 
@@ -321,7 +321,7 @@ InModuleScope $env:BHProjectName {
 
                     $testSite = ConvertFrom-Json -InputObject (Get-Content -Path $testArtifacts\SiteReturnType.json | Out-String)
                     $testSite.application_logins = $null
-                    $testSite.scope = $null
+                    $testSite.scope_v2 = $null
                     $testSite.scan_configurations = $null
                     $testSite.email_recipients = $null
 
@@ -387,7 +387,7 @@ InModuleScope $env:BHProjectName {
 
                     $testSite = ConvertFrom-Json -InputObject (Get-Content -Path $testArtifacts\SiteReturnType.json | Out-String)
                     $testSite.application_logins = $null
-                    $testSite.scope = $null
+                    $testSite.scope_v2 = $null
                     $testSite.scan_configurations = $null
 
                     $testResult = ConvertFrom-Json -InputObject (Get-Content -Path $testArtifacts\DeploymentResultType.json | Out-String)
@@ -436,7 +436,7 @@ InModuleScope $env:BHProjectName {
 
                     $testSite = ConvertFrom-Json -InputObject (Get-Content -Path $testArtifacts\SiteReturnType.json | Out-String)
                     $testSite.application_logins = $null
-                    $testSite.scope = $null
+                    $testSite.scope_v2 = $null
                     $testSite.scan_configurations = $null
                     $testSite.email_recipients = $null
 
@@ -527,8 +527,10 @@ InModuleScope $env:BHProjectName {
 
                     Should -Invoke -CommandName Update-BurpSuiteSiteScope -ParameterFilter {
                         $SiteId -eq $testSite.id `
-                            -and $IncludedUrls[0] -eq $testSiteDeployment.Properties.scope.includedUrls[0] `
-                            -and $ExcludedUrls[0] -eq $testSiteDeployment.Properties.scope.excludedUrls[0]
+                            -and $StartUrls[0] -eq $testSiteDeployment.Properties.scopeV2.startUrls[0] `
+                            -and $InScopeUrlPrefixes[0] -eq $testSiteDeployment.Properties.scopeV2.inScopeUrlPrefixes[0] `
+                            -and $OutOfScopeUrlPrefixes[0] -eq $testSiteDeployment.Properties.scopeV2.outOfScopeUrlPrefixes[0] `
+                            -and $ProtocolOptions -eq $testSiteDeployment.Properties.scopeV2.protocolOptions
                     }
 
                     $deployment.Id | Should -Be $testResult.Id
@@ -634,8 +636,10 @@ InModuleScope $env:BHProjectName {
                     Should -Invoke -CommandName New-BurpSuiteSite -ParameterFilter {
                         $ParentId -eq 0 `
                             -and $Name -eq $testSiteDeployment.Name `
-                            -and $Scope.IncludedUrls[0] -eq $testSiteDeployment.Properties.Scope.IncludedUrls[0] `
-                            -and $Scope.ExcludedUrls[0] -eq $testSiteDeployment.Properties.Scope.ExcludedUrls[0] `
+                            -and $ScopeV2.StartUrls[0] -eq $testSiteDeployment.Properties.scopeV2.startUrls[0] `
+                            -and $ScopeV2.InScopeUrlPrefixes[0] -eq $testSiteDeployment.Properties.scopeV2.inScopeUrlPrefixes[0] `
+                            -and $ScopeV2.OutOfScopeUrlPrefixes[0] -eq $testSiteDeployment.Properties.scopeV2.outOfScopeUrlPrefixes[0] `
+                            -and $ScopeV2.ProtocolOptions -eq $testSiteDeployment.Properties.scopeV2.protocolOptions `
                             -and $ScanConfigurationIds[0] -eq $testScanConfigurationResult.id `
                             -and $EmailRecipients[0].email -eq $testSiteDeployment.Properties.EmailRecipients[0].email `
                             -and (($LoginCredentials[0].Credential).GetNetworkCredential()).username -eq $testSiteDeployment.Properties.ApplicationLogins.loginCredentials[0].username `
@@ -734,8 +738,10 @@ InModuleScope $env:BHProjectName {
                 Should -Invoke -CommandName New-BurpSuiteSite -ParameterFilter {
                     $ParentId -eq $testFolderResult.Id `
                         -and $Name -eq $testSiteDeployment.Name `
-                        -and $Scope.IncludedUrls[0] -eq $testSiteDeployment.Properties.scope.includedUrls[0] `
-                        -and $Scope.ExcludedUrls[0] -eq $testSiteDeployment.Properties.scope.excludedUrls[0] `
+                        -and $ScopeV2.StartUrls[0] -eq $testSiteDeployment.Properties.scopeV2.startUrls[0] `
+                        -and $ScopeV2.InScopeUrlPrefixes[0] -eq $testSiteDeployment.Properties.scopeV2.inScopeUrlPrefixes[0] `
+                        -and $ScopeV2.OutOfScopeUrlPrefixes[0] -eq $testSiteDeployment.Properties.scopeV2.outOfScopeUrlPrefixes[0] `
+                        -and $ScopeV2.ProtocolOptions -eq $testSiteDeployment.Properties.scopeV2.protocolOptions `
                         -and $ScanConfigurationIds[0] -eq $testSiteDeployment.Properties.scanConfigurationIds[0] `
                         -and $EmailRecipients[0].email -eq $testSiteDeployment.Properties.EmailRecipients[0].email `
                         -and $LoginCredentials[0].label -eq $testSiteDeployment.Properties.applicationLogins.loginCredentials[0].label `
@@ -763,7 +769,7 @@ InModuleScope $env:BHProjectName {
                     $testSiteDeployment = ConvertFrom-Json -InputObject (Get-Content -Path $testArtifacts\FolderSiteDeploymentType.json | Out-String)
 
                     $testSite = ConvertFrom-Json -InputObject (Get-Content -Path $testArtifacts\FolderSiteReturnType.json | Out-String)
-                    $testSite.scope = $null
+                    $testSite.scope_v2 = $null
                     $testSite.scan_configurations = $null
                     $testSite.email_recipients = $null
 
@@ -822,7 +828,7 @@ InModuleScope $env:BHProjectName {
 
                     $testSite = ConvertFrom-Json -InputObject (Get-Content -Path $testArtifacts\FolderSiteReturnType.json | Out-String)
                     $testSite.application_logins = $null
-                    $testSite.scope = $null
+                    $testSite.scope_v2 = $null
                     $testSite.scan_configurations = $null
                     $testSite.email_recipients = $null
 
@@ -890,7 +896,7 @@ InModuleScope $env:BHProjectName {
 
                     $testSite = ConvertFrom-Json -InputObject (Get-Content -Path $testArtifacts\FolderSiteReturnType.json | Out-String)
                     $testSite.application_logins = $null
-                    $testSite.scope = $null
+                    $testSite.scope_v2 = $null
                     $testSite.scan_configurations = $null
                     $testSite.email_recipients = $null
 
@@ -965,7 +971,7 @@ InModuleScope $env:BHProjectName {
 
                     $testSite = ConvertFrom-Json -InputObject (Get-Content -Path $testArtifacts\FolderSiteReturnType.json | Out-String)
                     $testSite.application_logins = $null
-                    $testSite.scope = $null
+                    $testSite.scope_v2 = $null
                     $testSite.scan_configurations = $null
 
                     $testResult = ConvertFrom-Json -InputObject (Get-Content -Path $testArtifacts\DeploymentResultType.json | Out-String)
@@ -1022,7 +1028,7 @@ InModuleScope $env:BHProjectName {
 
                     $testSite = ConvertFrom-Json -InputObject (Get-Content -Path $testArtifacts\FolderSiteReturnType.json | Out-String)
                     $testSite.application_logins = $null
-                    $testSite.scope = $null
+                    $testSite.scope_v2 = $null
                     $testSite.scan_configurations = $null
                     $testSite.email_recipients = $null
 
@@ -1124,8 +1130,10 @@ InModuleScope $env:BHProjectName {
 
                     Should -Invoke -CommandName Update-BurpSuiteSiteScope -ParameterFilter {
                         $SiteId -eq $testSite.id `
-                            -and $IncludedUrls[0] -eq $testSiteDeployment.Properties.scope.includedUrls[0] `
-                            -and $ExcludedUrls[0] -eq $testSiteDeployment.Properties.scope.excludedUrls[0]
+                            -and $StartUrls[0] -eq $testSiteDeployment.Properties.scopeV2.startUrls[0] `
+                            -and $InScopeUrlPrefixes[0] -eq $testSiteDeployment.Properties.scopeV2.inScopeUrlPrefixes[0] `
+                            -and $OutOfScopeUrlPrefixes[0] -eq $testSiteDeployment.Properties.scopeV2.outOfScopeUrlPrefixes[0] `
+                            -and $ProtocolOptions -eq $testSiteDeployment.Properties.scopeV2.protocolOptions
                     }
 
                     $deployment.Id | Should -Be $testResult.Id

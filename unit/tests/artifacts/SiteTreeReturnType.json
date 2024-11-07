@@ -21,13 +21,17 @@
             "id": "589",
             "name": "sub.example.com",
             "parent_id": "588",
-            "scope": {
-                "included_urls": [
+            "scope_v2": {
+                "start_urls": [
                     "https://sub.example.com"
                 ],
-                "excluded_urls": [
-                    "https://sub.example.com/wp-admin"
-                ]
+                "in_scope_url_prefixes": [
+                    "https://sub.example.com"
+                ],
+                "out_of_scope_url_prefixes": [
+                    "https://sub.example.com/wp-admin/"
+                ],
+                "protocolOptions": "USE_HTTP_AND_HTTPS"
             },
             "scan_configurations": [
                 {
@@ -61,13 +65,17 @@
             "id": "586",
             "name": "www.example.com",
             "parent_id": "0",
-            "scope": {
-                "included_urls": [
+            "scope_v2": {
+                "start_urls": [
                     "https://www.example.com"
                 ],
-                "excluded_urls": [
+                "in_scope_url_prefixes": [
+                    "https://www.example.com"
+                ],
+                "out_of_scope_url_prefixes": [
                     "https://www.example.com/wp-admin/"
-                ]
+                ],
+                "protocolOptions": "USE_HTTP_AND_HTTPS"
             },
             "scan_configurations": [
                 {
